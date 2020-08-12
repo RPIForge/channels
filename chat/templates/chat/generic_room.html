@@ -31,7 +31,7 @@
 		{% block main %}
 		<main>
 		<div id="chatroom">
-			<textarea id="chat-log" disabled cols="100" rows="20">{{chat}}</textarea><br>
+			<textarea id="chat-log" disabled cols="100" rows="20">{% if chat %}{{chat}}{% endif %}</textarea><br>
 			<input id="chat-message-input" type="text"  size="100"><br>
 			<input id="chat-message-submit" type="button" value="Send">
 		</div>	
@@ -83,7 +83,7 @@
 				document.getElementById("chatroom").style.display = "block"; 
 				document.getElementById("waiting").style.display = "none"; 
 				document.querySelector('#chat-log').value += (data.volunteer_info+' has entered the chat!\n');
-			} else {
+			} else if(data.hasOwnProperty('message')) {
 				document.querySelector('#chat-log').value += (data.message + '\n');
 			}
         };

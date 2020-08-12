@@ -11,10 +11,15 @@
 {% block scripts %}
 {{block.super}}
 <script>
+{% if helped is True %}
+document.getElementById("waiting").style.display = "none"; 
+document.getElementById("chatroom").style.display = "block"; 
+document.getElementById("error").style.display = "none"; 
+{% else %}
 
 document.getElementById("waiting").style.display = "block"; 
 document.getElementById("chatroom").style.display = "none"; 
 document.getElementById("error").style.display = "none"; 
-
+{% endif %}
 </script>
 {% endblock scripts %}
