@@ -1,5 +1,4 @@
 from django.db import models
-from jsonfield import JSONField
 
 class UserQueue(models.Model):
     log_id = models.IntegerField()
