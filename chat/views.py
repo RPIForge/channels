@@ -43,18 +43,18 @@ def user_room(request):
         
         
         #see if user has already joined queue
-        current_users = UserQueue.objects.get(username=name)
+        current_users = UserQueue.objects.filter(username=name)
         if(current_users):
-            current_users.request = options;
-            current_users.save()
+            current_users[0].request = options;
+            current_users[0].save()
             
-            log = ChatLog.objects.get(id=current_users.log_id)
-            print(current_users.helping)
-            request.session['chatid'] = current_users.room_id
+            log = ChatLog.objects.get(id=current_users[0].log_id)
+            
+            request.session['chatid'] = current_users[0].room_id
             return render(request, 'chat/user_room.html', {
-                'room_name': current_users.room_id,
+                'room_name': current_users[0].room_id,
                 'chat': str(log.text),
-                'helped': current_users.helping
+                'helped': current_users[0].helping
             })
             
          
