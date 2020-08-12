@@ -1,0 +1,121 @@
+{% load static %}
+
+<!--TODO: Add an error block that checks for an error in session storage, and displays it if it exists. -->
+
+<html>
+	{% block head %}
+	<head>
+		
+		{% block custom_styles %}
+		{% endblock custom_styles %}
+
+
+		{% block meta %}
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+		{% endblock meta %}
+
+		{% block page_title %}
+		<title>Chat Room</title>
+		{% endblock page_title %}
+	</head>
+	{% endblock head %}
+	
+	{% block body %}
+	<body>
+		{% block header %}
+		{% endblock header %}
+
+		{% block pre_main %}
+		{% endblock pre_main%}
+
+		{% block main %}
+		<main>
+		<div id="chatroom">
+			<textarea id="chat-log" disabled cols="100" rows="20">{{chat}}</textarea><br>
+			<input id="chat-message-input" type="text"  size="100"><br>
+			<input id="chat-message-submit" type="button" value="Send">
+		</div>	
+		</main>
+		{% endblock main %}
+		
+		{% block post_main %}
+		<div id="error">
+			<p>An error occurred please  try again</p>
+		</div>
+		{% endblock post_main %}
+
+		{% block footer %}
+
+		{% endblock footer %}
+	</body>
+	{% endblock body %}
+
+	{# Load scripts and fonts at the end of the page to improve load time. #}
+
+	{% block scripts %}
+	<script>
+		document.getElementById("error").style.display = "none"; 
+		
+		closing = false;
+        const roomName = JSON.parse("{{room_name}}");
+		const name = "{{volunteer_name}}";
+        const chatSocket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/chat/'
+            + roomName
+            + '/'
+        );
+		
+		
+		
+		chatSocket.onopen = function(e) {
+			chatSocket.send(JSON.stringify({
+                'volunteer_info': name
+            }));
+		};
+			
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+			console.log(data);
+
+			if(data.hasOwnProperty('volunteer_info') && data.volunteer_info){
+				document.getElementById("chatroom").style.display = "block"; 
+				document.getElementById("waiting").style.display = "none"; 
+				document.querySelector('#chat-log').value += (data.volunteer_info+' has entered the chat!\n');
+			} else {
+				document.querySelector('#chat-log').value += (data.message + '\n');
+			}
+        };
+
+        chatSocket.onclose = function(e) {
+			if(!closing){
+				document.getElementById("error").style.display = "block"; 
+				console.error('Chat socket closed unexpectedly');
+			}
+        };
+
+        document.querySelector('#chat-message-input').focus();
+        document.querySelector('#chat-message-input').onkeyup = function(e) {
+            if (e.keyCode === 13) {  // enter, return
+                document.querySelector('#chat-message-submit').click();
+            }
+        };
+
+        document.querySelector('#chat-message-submit').onclick = function(e) {
+            const messageInputDom = document.querySelector('#chat-message-input');
+            const message = messageInputDom.value;
+            chatSocket.send(JSON.stringify({
+                'message': message
+            }));
+            messageInputDom.value = '';
+        };
+		
+		
+	</script>
+	{% endblock scripts %}
+
+	{% block fonts %}
+	{% endblock fonts %}
+
+</html>

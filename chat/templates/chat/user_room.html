@@ -1,0 +1,20 @@
+{% extends "chat/generic_room.html" %}
+
+{% block main %}
+{{block.super}}
+<div id="waiting">
+	<p>Please wait while we figure shit out</p>
+</div>
+{% endblock main %}
+	
+	
+{% block scripts %}
+{{block.super}}
+<script>
+
+document.getElementById("waiting").style.display = "block"; 
+document.getElementById("chatroom").style.display = "none"; 
+document.getElementById("error").style.display = "none"; 
+
+</script>
+{% endblock scripts %}

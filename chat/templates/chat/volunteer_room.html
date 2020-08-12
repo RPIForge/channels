@@ -1,0 +1,30 @@
+{% extends "chat/generic_room.html" %}
+
+{% block main %}
+{{block.super}}
+<input id="chat-finish-submit" type="button" value="Finish">
+{% endblock main %}
+	
+	
+{% block scripts %}
+{{block.super}}
+<script>
+	document.querySelector('#chat-finish-submit').onclick = function(e) {
+		closing = true;
+		chatSocket.send(JSON.stringify({
+			'message': name+"has finished helping you. You may leave whenevs"
+		}));
+		chatSocket.send(JSON.stringify({
+			'volunteer_finish': true
+		}));
+		chatSocket.close();
+
+		window.location.replace("/volunteer/select?uuid={{uuid}}&name={{volunteer_name}}");
+		
+	};
+	
+</script>
+{% endblock scripts %}
+
+   
+
