@@ -6,6 +6,7 @@ from chat.models import ChatLog
 from channels.db import database_sync_to_async
 
 class ChatConsumer(AsyncWebsocketConsumer):
+    name = ""
     
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
@@ -22,7 +23,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
-
+        await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'chat_message',
+                    'message': self.name+" has left the chat!",
+                    'name': self.name
+                }
+            )
             
         # Leave room group
         await self.channel_layer.group_discard(
@@ -51,23 +59,32 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if("volunteer_finish" in text_data_json):
             await self.delete_room()
         elif("volunteer_info" in text_data_json):
+            if(self.name==""):
+                self.name = text_data_json["volunteer_info"]
+            
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
                     'type': 'chat_message',
-                    'volunteer_info': text_data_json["volunteer_info"]
+                    'volunteer_info': self.name
                 }
             )
+            
         elif("message" in text_data_json):
             message = text_data_json['message']
+            name = text_data_json['name']
             
-            await self.add_text(str(message+'\n'))
+            if(self.name==""):
+                self.name = name
+            
+            await self.add_text(str(self.name+":"+message+'\n'))
             # Send message to room group
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
                     'type': 'chat_message',
-                    'message': message
+                    'message': message,
+                    'name': self.name
                 }
             )
 

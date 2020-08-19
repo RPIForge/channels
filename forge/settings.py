@@ -128,7 +128,6 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
-
 STATIC_URL = '/static/'
 
 
@@ -143,7 +142,7 @@ CHANNEL_LAYERS = {
     },
 }
 
-MAIN_SITE_URL="10.0.0.140"
+MAIN_SITE_URL="192.168.227.242"
 MAIN_SITE_PORT=8000
 
 #cORS SET update

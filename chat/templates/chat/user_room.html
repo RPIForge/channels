@@ -21,5 +21,12 @@ document.getElementById("waiting").style.display = "block";
 document.getElementById("chatroom").style.display = "none"; 
 document.getElementById("error").style.display = "none"; 
 {% endif %}
+
+chatSocket.onopen = function(e) {
+	chatSocket.send(JSON.stringify({
+		'message': name+" has joined the chat!",
+		'name': name
+	}));
+};
 </script>
 {% endblock scripts %}

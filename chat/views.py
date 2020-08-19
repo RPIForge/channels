@@ -54,6 +54,7 @@ def user_room(request):
             return render(request, 'chat/user_room.html', {
                 'room_name': current_users[0].room_id,
                 'chat': str(log.text),
+                'name': name,
                 'helped': current_users[0].helping
             })
             
@@ -82,7 +83,8 @@ def user_room(request):
         
         return render(request, 'chat/user_room.html', {
             'room_name': roomid,
-            'chat': str(log.text)
+            'chat': str(log.text),
+            'name': name
         })
         
 @xframe_options_exempt
@@ -154,7 +156,7 @@ def volunteer_room(request):
         
         return render(request, 'chat/volunteer_room.html', {
             'room_name': room_id,
-            'volunteer_name': name,
+            'name': name,
             'uuid': user_id,
             'chat': str(log.text)
         })        

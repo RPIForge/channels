@@ -1,18 +1,70 @@
 {% extends "chat/generic_room.html" %}
 
+
+{% block custom_styles %}
+<style>
+.chat {
+	background-color: lightred;
+	width: 100%;
+	height: 90%;
+	top: 0;
+	left: 0;
+	overflow-y: scroll;
+}
+
+.inputbox {
+	width: 75%;
+	height: 5%;
+	float: left;
+}
+
+.inputsubmit {
+	margin-left:75%;
+	height: 5%;
+	width: 12.5%
+	border: 0;
+}
+
+.inputfinish {
+	margin-left:75%;
+	height: 5%;
+	width: 12.5%
+	border: 0;
+}
+
+.input {
+	width: 100%;
+	height: 100%;
+}
+</style>
+{% endblock custom_styles %}
+
+
+
 {% block main %}
 {{block.super}}
-<input id="chat-finish-submit" type="button" value="Finish">
+<div class="inputfinish">
+<input id="chat-finish-submit" type="button" value="Finish" class="input">
+</div>
 {% endblock main %}
-	
+
 	
 {% block scripts %}
 {{block.super}}
 <script>
+	chatSocket.onopen = function(e) {
+			chatSocket.send(JSON.stringify({
+                'volunteer_info': name
+				
+            }));
+		};
+		
+		
 	document.querySelector('#chat-finish-submit').onclick = function(e) {
 		closing = true;
 		chatSocket.send(JSON.stringify({
-			'message': name+"has finished helping you. You may leave whenevs"
+			'message': name+" has finished helping you. You may leave whenevs",
+			'name': name
 		}));
 		chatSocket.send(JSON.stringify({
 			'volunteer_finish': true

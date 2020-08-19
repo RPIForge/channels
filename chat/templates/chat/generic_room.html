@@ -7,6 +7,37 @@
 	<head>
 		
 		{% block custom_styles %}
+		<!--
+		<link rel="stylesheet" type="text/css" href="{% static 'forge/css/chat.css' %}">
+		-->
+		<style>
+		.chat {
+			background-color: lightred;
+			width: 100%;
+			height: 90%;
+			top: 0;
+			left: 0;
+			overflow-y: scroll;
+		}
+
+		.inputbox {
+			width: 75%;
+			height: 5%;
+			float: left;
+		}
+
+		.inputsubmit {
+			margin-left:75%;
+			height: 5%;
+			width: 25%
+			border: 0;
+		}
+		
+		.input {
+			width: 100%;
+			height: 100%;
+		}
+		</style>
 		{% endblock custom_styles %}
 
 
@@ -31,9 +62,16 @@
 		{% block main %}
 		<main>
 		<div id="chatroom">
-			<textarea id="chat-log" disabled cols="100" rows="20">{% if chat %}{{chat}}{% endif %}</textarea><br>
-			<input id="chat-message-input" type="text"  size="100"><br>
-			<input id="chat-message-submit" type="button" value="Send">
+			<div id="chatbox" class="chat">
+			</div>
+			
+			<div class="inputbox">
+			<input id="chat-message-input" type="text" class="input"><br>
+			</div>
+			
+			<div class="inputsubmit">
+			<input id="chat-message-submit" type="button" value="Send" class="input">
+			</div>
 		</div>	
 		</main>
 		{% endblock main %}
@@ -54,12 +92,19 @@
 
 	{% block scripts %}
 	<script>
-		document.getElementById("error").style.display = "none"; 
 		
+		
+		/*variable decleration*/
 		closing = false;
-        const roomName = JSON.parse("{{room_name}}");
-		const name = "{{volunteer_name}}";
-        const chatSocket = new WebSocket(
+        const roomName = JSON.parse("{{room_name|escapejs }}");
+		const name = "{{name|escapejs }}";
+		const chat = "{{chat|escapejs }}";
+        
+		
+		
+		
+		/*chat socket decleration*/
+		const chatSocket = new WebSocket(
             'ws://'
             + window.location.host
             + '/ws/chat/'
@@ -69,22 +114,26 @@
 		
 		
 		
-		chatSocket.onopen = function(e) {
-			chatSocket.send(JSON.stringify({
-                'volunteer_info': name
-            }));
-		};
-			
+		/*chat socket functions*/
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
 			console.log(data);
 
 			if(data.hasOwnProperty('volunteer_info') && data.volunteer_info){
-				document.getElementById("chatroom").style.display = "block"; 
-				document.getElementById("waiting").style.display = "none"; 
-				document.querySelector('#chat-log').value += (data.volunteer_info+' has entered the chat!\n');
+				var chatroom = document.getElementById("chatroom");
+				var waiting = document.getElementById("waiting");
+				
+				if(chatroom!==null){
+					chatroom.style.display = "block"; 
+				}
+				
+				if(waiting!==null){
+					waiting.style.display = "none"; 
+				}
+				
+				addMessage(data.volunteer_info+' has entered the chat!\n');
 			} else if(data.hasOwnProperty('message')) {
-				document.querySelector('#chat-log').value += (data.message + '\n');
+				addMessage(data.name+":"+data.message + '\n');
 			}
         };
 
@@ -106,11 +155,26 @@
             const messageInputDom = document.querySelector('#chat-message-input');
             const message = messageInputDom.value;
             chatSocket.send(JSON.stringify({
-                'message': message
+                'message': message,
+				'name': name
             }));
             messageInputDom.value = '';
         };
 		
+		/*general purpose function*/
+		function addMessage(input) {
+			var new_input = "<div class=message>"+input+"</div>";
+			document.getElementById("chatbox").innerHTML += new_input;
+		}
+		
+		
+		/*start code*/
+		document.getElementById("error").style.display = "none"; 
+		var chat_array = chat.split("\n");
+		for (var i = 0; i < chat_array.length; i++) {
+			addMessage(chat_array[i]);
+			//Do something
+		}
 		
 	</script>
 	{% endblock scripts %}
