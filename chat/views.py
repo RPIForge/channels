@@ -1,92 +1,125 @@
 # chat/views.py
 from django.shortcuts import render
 from django.views.decorators.clickjacking import xframe_options_exempt
+from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, HttpResponseRedirect
 
 from django.conf import settings
 from chat.models import UserQueue
 from chat.models import ChatLog
+from .forms import InfoForm
 
 
 from random import randint
 import requests
 from datetime import datetime, timedelta
 
-def index(request):
-    return render(request, 'chat/index.html', {})
 
 @xframe_options_exempt
+def user_info(request):
+    #get userid of request
+    user_id = request.GET.get('uuid'," ")
+    
+    
+    #### UNCOMMENT THIS TO ENABLE SECURITY
+    #verify user
+    #r = requests.get("http://"+settings.MAIN_SITE_URL+":"+str(settings.MAIN_SITE_PORT)+"/api/users/verify", params={'uuid':user_id})
+ 
+    #if(r.status_code!=200):
+    #    return HttpResponse('Unauthorized', status=401)
+    
+    
+    info_form = InfoForm({'name':request.GET.get('name',""),'email':request.GET.get('email',"")})
+    
+    
+
+    return render(request, 'chat/forms/user_info.html', {'info_form': info_form,'uuid':user_id})
+    
+    
+@xframe_options_exempt
+@csrf_exempt 
 def user_room(request):
-    if(request.method  == "GET"): 
+    if(request.method  == "POST"): 
         #get variables
         name = request.GET.get('name'," ")    
         user_id = request.GET.get('uuid'," ")
         options = request.GET.get('request','')
         email = request.GET.get('email','')
         
-        #verify user
-        r = requests.get("http://"+settings.MAIN_SITE_URL+":"+str(settings.MAIN_SITE_PORT)+"/api/users/verify", params={'uuid':user_id})
+        info_form = InfoForm(request.POST)
+        if(info_form.is_valid()):
         
-        #### UNCOMMENT THIS TO ENABLE SECURITY
-        #if(r.status_code!=200):
-        #    return HttpResponse('Unauthorized', status=401)
-        
-        #Delete old chats. Need to find a better way to do this ###FIX###
-        time_threshold = datetime.now() - timedelta(hours=1)
-        results = UserQueue.objects.filter(created__lte=time_threshold).delete()
+            email = info_form.cleaned_data.get('email')
+            name = info_form.cleaned_data.get('name')
+            options = info_form.cleaned_data.get('request')
+            options_string = ', '.join(options)
+
+            #verify user
+            #r = requests.get("http://"+settings.MAIN_SITE_URL+":"+str(settings.MAIN_SITE_PORT)+"/api/users/verify", params={'uuid':user_id})
+            
+            #### UNCOMMENT THIS TO ENABLE SECURITY
+            #if(r.status_code!=200):
+            #    return HttpResponse('Unauthorized', status=401)
+            
+            #Delete old chats. Need to find a better way to do this ###FIX###
+            time_threshold = datetime.now() - timedelta(hours=1)
+            results = UserQueue.objects.filter(created__lte=time_threshold).delete()
+                    
+            if 'chatid' in request.session:
+                return render(request, 'chat/user_room.html', {
+                    'room_name': request.session['chatid']
+                })
+            
+            
+            
+            #see if user has already joined queue
+            current_users = UserQueue.objects.filter(username=name)
+            if(current_users):
+                current_users[0].request = options_string;
+                current_users[0].save()
                 
-        if 'chatid' in request.session:
-            return render(request, 'chat/user_room.html', {
-                'room_name': request.session['chatid']
-            })
-        
-        
-        
-        #see if user has already joined queue
-        current_users = UserQueue.objects.filter(username=name)
-        if(current_users):
-            current_users[0].request = options;
-            current_users[0].save()
+                log = ChatLog.objects.get(id=current_users[0].log_id)
+                
+                request.session['chatid'] = current_users[0].room_id
+                return render(request, 'chat/user_room.html', {
+                    'room_name': current_users[0].room_id,
+                    'chat': str(log.text),
+                    'name': name,
+                    'helped': current_users[0].helping
+                })
+                
             
-            log = ChatLog.objects.get(id=current_users[0].log_id)
             
-            request.session['chatid'] = current_users[0].room_id
-            return render(request, 'chat/user_room.html', {
-                'room_name': current_users[0].room_id,
-                'chat': str(log.text),
-                'name': name,
-                'helped': current_users[0].helping
-            })
-            
-         
-        
-            
-        #Generate room id
-        roomid = randint(1, 999)
-        current_rooms = UserQueue.objects.filter(room_id=roomid)
-        while(current_rooms):
+                
+            #Generate room id
             roomid = randint(1, 999)
             current_rooms = UserQueue.objects.filter(room_id=roomid)
+            while(current_rooms):
+                roomid = randint(1, 999)
+                current_rooms = UserQueue.objects.filter(room_id=roomid)
+                
             
-        
-        request.session['chatid'] = roomid
-        
-        #add chat to general database
-        log = ChatLog(username=name,room_id=roomid,request=options,email=email)
-        log.save()
-        
-        #Add user to queue database
-        queue = UserQueue(log_id=log.id, username=name,room_id=roomid,request=options)
-        queue.save()
-        
-        
-        
-        return render(request, 'chat/user_room.html', {
-            'room_name': roomid,
-            'chat': str(log.text),
-            'name': name
-        })
-        
+            request.session['chatid'] = roomid
+            
+            #add chat to general database
+            log = ChatLog(username=name,room_id=roomid,request=options_string,email=email)
+            log.save()
+            
+            #Add user to queue database
+            queue = UserQueue(log_id=log.id, username=name,room_id=roomid,request=options_string)
+            queue.save()
+            
+            
+            
+            return render(request, 'chat/user_room.html', {
+                'room_name': roomid,
+                'chat': str(log.text),
+                'name': name
+            })
+        else:
+            return render(request, 'chat/forms/user_info.html', {'info_form': info_form,'uuid':user_id})
+            
+            
 @xframe_options_exempt
 def volunteer_select(request):
     if(request.method  == "GET"): 

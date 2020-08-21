@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'channels',
     'chat',
+    'forge',
     'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -117,7 +118,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/New_York'
 
 USE_I18N = True
 
@@ -128,7 +129,10 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
+
+
 STATIC_URL = '/static/'
+
 
 
 #ASGI Application
@@ -142,7 +146,7 @@ CHANNEL_LAYERS = {
     },
 }
 
-MAIN_SITE_URL="192.168.227.242"
+MAIN_SITE_URL="192.168.227.246"
 MAIN_SITE_PORT=8000
 
 #cORS SET update

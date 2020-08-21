@@ -1,0 +1,47 @@
+{% load static %}
+
+{% block page_title %}
+<title>Chat Info</title>
+{% endblock page_title %}
+
+{% block custom_styles %}
+    <link rel="stylesheet" type="text/css" href="{% static 'forge/css/forms/form.css' %}">
+{% endblock custom_styles %}
+    
+{% block header %}
+{% endblock header%}
+
+{% block main %}
+    <main class="bg_shade">
+        <div id="form_container" class="center_children fill_parent_horiz fill_screen_vert">
+            <div id="form">
+                <p class="title" id="machine_selection_title"><strong>Please enter your information and select your help topic</strong><br>if rejoining use same email and submit</p>
+                <form method="POST" action="/user/chat?uuid={{uuid}}">
+                    {% csrf_token %}
+					{{ info_form.non_field_errors }}
+
+					  {% for hidden_field in info_form.hidden_fields %}
+						{{ hidden_field.errors }}
+						{{ hidden_field }}
+					  {% endfor %}
+                    
+					
+					{{ info_form.name }}
+					<br>
+					{{ info_form.email }}
+					<br>
+					<p> Please select your help topic </p>
+					
+					{{ info_form.request }}
+                    <br /><br />
+
+                    <label>By clicking Sign Up, you agree to our <a href="thing">Data Policy</a>.</label>
+
+                    <br />
+					
+                    <button type="submit" id="submit_button">Join Queue</button>
+                </form>
+            </div>
+        </div>
+    </main>
+{% endblock main %}
