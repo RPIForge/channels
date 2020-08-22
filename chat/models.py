@@ -15,6 +15,13 @@ class ChatLog(models.Model):
     room_id = models.CharField(max_length=255, unique=True)
     username = models.CharField(max_length=255)
     request =  models.CharField(max_length=255)
-    email = models.CharField(max_length=255)
+    email = models.EmailField()
     text = models.TextField()
     
+
+    
+    
+class FileLog(models.Model):
+    id = models.AutoField(primary_key=True)   
+    file = models.FileField(upload_to='chatfiles/%Y/%m/%d/')
+    created = models.DateTimeField(auto_now_add=True)

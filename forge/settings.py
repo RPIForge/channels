@@ -130,9 +130,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-
+##STATIC FILES
 STATIC_URL = '/static/'
 
+##MEDIA FILES
+MEDIA_URL = '/uploads/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 #ASGI Application
@@ -147,7 +150,7 @@ CHANNEL_LAYERS = {
 }
 
 
-MAIN_SITE_URL="10.0.0.1"
+MAIN_SITE_URL="192.168.227.246"
 MAIN_SITE_PORT=8000
 
 #cORS SET update

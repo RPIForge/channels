@@ -1,9 +1,9 @@
 from django import forms
-
+from . import models
 
 
 class InfoForm(forms.Form):
-    request_options =(("3dprinting","3d printing Help"),("lazercutter","Lazer Cutter Help"), ("generalhelp","General Help"))
+    request_options =(("3dprinting","3d printing Help"),("lasercutter","Laser Cutter Help"), ("generalhelp","General Help"))
     
     name = forms.CharField(label='Your name')
     email = forms.EmailField()
@@ -20,4 +20,8 @@ class InfoForm(forms.Form):
             f.widget.attrs = {"placeholder":f.label}
             f.label = ""
             
-        
+
+class FileForm(forms.ModelForm):  
+    class Meta:                                 
+        model = models.FileLog 
+        fields = ('file',)

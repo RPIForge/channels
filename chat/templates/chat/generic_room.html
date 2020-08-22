@@ -42,6 +42,11 @@
 			<div class="inputsubmit">
 			<input id="chat-message-submit" type="button" value="Send" class="input">
 			</div>
+			
+			<form method="POST" action="/upload?uuid={{room_name}}" id="fileform">
+				{% csrf_token %}
+				{{file_form}}
+			</form>
 		</div>	
 		</main>
 		{% endblock main %}
@@ -61,6 +66,7 @@
 	{# Load scripts and fonts at the end of the page to improve load time. #}
 
 	{% block scripts %}
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" crossorigin="anonymous"></script>
 	<script>
 		
 		
@@ -131,6 +137,52 @@
             messageInputDom.value = '';
         };
 		
+		/*file upload code*/
+		document.getElementById("id_file").onchange = function() {
+			
+			var fd = new FormData();
+			var files = $('#id_file')[0].files[0];
+			fd.append('file',files);
+
+			$.ajax({
+				url: '/upload?roomName='+roomName,
+				type: 'post',
+				data: fd,
+				contentType: false,
+				processData: false,
+				success: function(response){
+					if(response != 0){
+						console.log(response);
+					}else{
+						console.log("file not uploaded");
+					}
+				},
+			});
+			
+			
+			
+			/*
+			console.log("create post is working!") // sanity check
+			$.ajax({
+				url: '/upload?roomName='+roomName, // the endpoint
+				type : "POST", // http method
+				data : { the_post : $('#fileform').val() }, // data sent with the post request
+
+				// handle a successful response
+				success : function(json) {
+					$('#fileform').val(''); // remove the value from the input
+					console.log(json); // log the returned json to the console
+					console.log("success"); // another sanity check
+				},
+
+				// handle a non-successful response
+				error : function(xhr,errmsg,err) {
+					console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+				}
+			});*/
+		};
+		
+		
 		/*general purpose function*/
 		function addMessage(input) {
 			var new_input = "<div class=message>"+input+"</div>";
@@ -146,10 +198,13 @@
 			//Do something
 		}
 		
+		
+		
 	</script>
 	{% endblock scripts %}
 
 	{% block fonts %}
 	{% endblock fonts %}
+	
 
 </html>

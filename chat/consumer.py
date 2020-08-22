@@ -31,7 +31,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'name': self.name
                 }
             )
-            
+   
+        await self.add_text(self.name+" has left the chat!")
+   
         # Leave room group
         await self.channel_layer.group_discard(
             self.room_group_name,

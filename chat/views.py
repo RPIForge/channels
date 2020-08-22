@@ -5,9 +5,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, HttpResponseRedirect
 
 from django.conf import settings
-from chat.models import UserQueue
-from chat.models import ChatLog
-from .forms import InfoForm
+from chat.models import UserQueue, ChatLog, FileLog
+from .forms import InfoForm, FileForm
 
 
 from random import randint
@@ -15,6 +14,21 @@ import requests
 from datetime import datetime, timedelta
 
 
+
+############## GENERAL FUNCTIONS ###################
+@csrf_exempt 
+def handle_file(request):
+   
+    file_form = FileForm(request.POST, request.FILES)
+    
+    if(file_form.is_valid()):
+        model_file = file_form.save()
+        return HttpResponse(model_file.id, status=200)
+        
+    return HttpResponse('Failed to Upload', status=404)
+    
+    
+############## USER FUNCTIONS ######################
 @xframe_options_exempt
 def user_info(request):
     #get userid of request
@@ -41,10 +55,7 @@ def user_info(request):
 def user_room(request):
     if(request.method  == "POST"): 
         #get variables
-        name = request.GET.get('name'," ")    
         user_id = request.GET.get('uuid'," ")
-        options = request.GET.get('request','')
-        email = request.GET.get('email','')
         
         info_form = InfoForm(request.POST)
         if(info_form.is_valid()):
@@ -65,27 +76,23 @@ def user_room(request):
             time_threshold = datetime.now() - timedelta(hours=1)
             results = UserQueue.objects.filter(created__lte=time_threshold).delete()
                     
-            if 'chatid' in request.session:
-                return render(request, 'chat/user_room.html', {
-                    'room_name': request.session['chatid']
-                })
-            
+
             
             
             #see if user has already joined queue
-            current_users = UserQueue.objects.filter(username=name)
-            if(current_users):
-                current_users[0].request = options_string;
-                current_users[0].save()
-                
-                log = ChatLog.objects.get(id=current_users[0].log_id)
-                
-                request.session['chatid'] = current_users[0].room_id
+            log_user = ChatLog.objects.filter(email=email).last()
+            if(log_user):
+                queue_user = UserQueue.objects.filter(log_id=log_user.id)
+                queue_user[0].request = options_string;
+                queue_user[0].save()
+                               
+                request.session['chatid'] = queue_user[0].room_id
                 return render(request, 'chat/user_room.html', {
-                    'room_name': current_users[0].room_id,
-                    'chat': str(log.text),
-                    'name': name,
-                    'helped': current_users[0].helping
+                    'room_name': queue_user[0].room_id,
+                    'chat': str(log_user.text),
+                    'name': queue_user[0].username,
+                    'helped': queue_user[0].helping,
+                    'file_form':FileForm()
                 })
                 
             
@@ -114,12 +121,15 @@ def user_room(request):
             return render(request, 'chat/user_room.html', {
                 'room_name': roomid,
                 'chat': str(log.text),
-                'name': name
+                'name': name,
+                'file_form':FileForm()
             })
         else:
             return render(request, 'chat/forms/user_info.html', {'info_form': info_form,'uuid':user_id})
             
-            
+ 
+
+############## VOLUNTEER FUNCTIONS ###################
 @xframe_options_exempt
 def volunteer_select(request):
     if(request.method  == "GET"): 
@@ -191,7 +201,8 @@ def volunteer_room(request):
             'room_name': room_id,
             'name': name,
             'uuid': user_id,
-            'chat': str(log.text)
+            'chat': str(log.text),
+            'file_form':FileForm()
         })        
         
         
