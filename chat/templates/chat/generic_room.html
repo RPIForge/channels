@@ -43,7 +43,7 @@
 			<input id="chat-message-submit" type="button" value="Send" class="input">
 			</div>
 			
-			<form method="POST" action="/upload?uuid={{room_name}}" id="fileform">
+			<form method="POST" id="fileform">
 				{% csrf_token %}
 				{{file_form}}
 			</form>
@@ -75,6 +75,7 @@
         const roomName = JSON.parse("{{room_name|escapejs }}");
 		const name = "{{name|escapejs }}";
 		const chat = "{{chat|escapejs }}";
+		const user_id = "{{uuid|escapejs }}";
         
 		
 		
@@ -87,6 +88,8 @@
             + roomName
             + '/'
         );
+		
+		
 		
 		
 		
@@ -106,8 +109,26 @@
 				if(waiting!==null){
 					waiting.style.display = "none"; 
 				}
+				addMessage(data.name+":"+data.message + '\n');
+			} else if(data.hasOwnProperty('volunteer_finish')) {
+				var input = document.getElementById("chat-message-input");
+				var submit = document.getElementById("chat-message-submit");
+				var file = document.getElementById("fileform");
 				
-				addMessage(data.volunteer_info+' has entered the chat!\n');
+				if(input!==null){
+					input.disabled = true; 
+				}
+				
+				if(submit!==null){
+					submit.display = true; 
+				}
+				
+				if(file!==null){
+					file.display = true; 
+				}
+				closing = true;
+				addMessage(data.name+":"+data.message + '\n');
+			
 			} else if(data.hasOwnProperty('message')) {
 				addMessage(data.name+":"+data.message + '\n');
 			}
@@ -128,65 +149,70 @@
         };
 
         document.querySelector('#chat-message-submit').onclick = function(e) {
-            const messageInputDom = document.querySelector('#chat-message-input');
-            const message = messageInputDom.value;
-            chatSocket.send(JSON.stringify({
-                'message': message,
-				'name': name
-            }));
-            messageInputDom.value = '';
+            if(!closing){
+				const messageInputDom = document.querySelector('#chat-message-input');
+				const message = messageInputDom.value;
+				sendMessage({
+					'message': message,
+					'name': name
+				});
+				messageInputDom.value = '';
+			}
         };
 		
 		/*file upload code*/
 		document.getElementById("id_file").onchange = function() {
-			
+			if(closing){
+				return;
+			}
 			var fd = new FormData();
 			var files = $('#id_file')[0].files[0];
 			fd.append('file',files);
 
 			$.ajax({
-				url: '/upload?roomName='+roomName,
+				url: '/upload?room_id='+roomName+'&uuid='+user_id,
 				type: 'post',
 				data: fd,
 				contentType: false,
 				processData: false,
 				success: function(response){
 					if(response != 0){
-						console.log(response);
+						var message = "Uploaded file. Click <a href='/download?room_id="+roomName+"&uuid="+user_id+"&id="+response+"' download target='_blank'>here</a>";
+						sendMessage({
+							'name': name,
+							'message': message
+						});
+						
+
 					}else{
 						console.log("file not uploaded");
 					}
 				},
+				error: function(response){
+					sendMessage({
+						'name': name,
+						'message': response
+					});
+				}
 			});
 			
 			
-			
-			/*
-			console.log("create post is working!") // sanity check
-			$.ajax({
-				url: '/upload?roomName='+roomName, // the endpoint
-				type : "POST", // http method
-				data : { the_post : $('#fileform').val() }, // data sent with the post request
-
-				// handle a successful response
-				success : function(json) {
-					$('#fileform').val(''); // remove the value from the input
-					console.log(json); // log the returned json to the console
-					console.log("success"); // another sanity check
-				},
-
-				// handle a non-successful response
-				error : function(xhr,errmsg,err) {
-					console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
-				}
-			});*/
+			document.getElementById("id_file").value = '';
 		};
 		
 		
 		/*general purpose function*/
+		function sendMessage(dictionary) {
+			chatSocket.send(JSON.stringify(dictionary));
+		
+		}
+		
 		function addMessage(input) {
 			var new_input = "<div class=message>"+input+"</div>";
-			document.getElementById("chatbox").innerHTML += new_input;
+			var chat = document.getElementById("chatbox")
+			chat.innerHTML += new_input;
+
+			chat.scrollTop = chat.scrollHeight;
 		}
 		
 		

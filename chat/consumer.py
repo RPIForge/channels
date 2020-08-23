@@ -4,6 +4,8 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from chat.models import UserQueue
 from chat.models import ChatLog
 from channels.db import database_sync_to_async
+from django.core.exceptions import ObjectDoesNotExist
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
     name = ""
@@ -27,12 +29,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.room_group_name,
                 {
                     'type': 'chat_message',
-                    'message': self.name+" has left the chat!",
+                    'message': self.name+" has left the chat!\n",
                     'name': self.name
                 }
             )
    
-        await self.add_text(self.name+" has left the chat!")
+        await self.add_text(self.name+" has left the chat!\n")
    
         # Leave room group
         await self.channel_layer.group_discard(
@@ -48,8 +50,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
     @database_sync_to_async
     def add_text(self,string_data):
-        room = UserQueue.objects.get(room_id=self.room_name)
-        log = ChatLog.objects.get(id=room.log_id)
+        try:
+            room = UserQueue.objects.get(room_id=self.room_name)
+            log = ChatLog.objects.get(id=room.log_id)
+        except ObjectDoesNotExist:
+            return None
+        
         log.text = log.text + string_data
         return log.save()
     
@@ -59,19 +65,38 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         
         if("volunteer_finish" in text_data_json):
-            await self.delete_room()
-        elif("volunteer_info" in text_data_json):
-            if(self.name==""):
-                self.name = text_data_json["volunteer_info"]
-            
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
                     'type': 'chat_message',
-                    'volunteer_info': self.name
+                    'message': self.name+" has closed the chat. You may leave whenever",
+                    'name': self.name,
+                    'volunteer_finish': True
                 }
             )
             
+            
+            await self.delete_room()
+            
+        elif("volunteer_info" in text_data_json):
+            if(self.name==""):
+                self.name = text_data_json["volunteer_info"]
+            
+            message = str(self.name+" has joined the chat!")
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'chat_message',
+                    'message':message,
+                    'name': self.name,
+                    'volunteer_info': True
+                    
+                }
+            )
+            
+            await self.add_text(message+'\n') 
+            
+                   
         elif("message" in text_data_json):
             message = text_data_json['message']
             name = text_data_json['name']

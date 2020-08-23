@@ -22,6 +22,12 @@ class InfoForm(forms.Form):
             
 
 class FileForm(forms.ModelForm):  
+    def __init__(self, *args, **kwargs):
+        super(FileForm, self).__init__(*args, **kwargs)
+        self.fields['file'].label = ""
+        self.fields['file'].widget.attrs = {"placeholder":"Upload File"}
+        
+    
     class Meta:                                 
         model = models.FileLog 
         fields = ('file',)

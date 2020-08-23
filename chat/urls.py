@@ -5,6 +5,7 @@ from . import views
 urlpatterns = [
     #general urls
     path('upload', views.handle_file, name='file_upload'),
+    path('download', views.download_file, name='file_download'),
     
     #user urls
     path('user/chat', views.user_room, name='user_chat'),

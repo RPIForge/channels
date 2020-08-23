@@ -12,7 +12,6 @@ class UserQueue(models.Model):
 class ChatLog(models.Model):
     id = models.AutoField(primary_key=True)
     created = models.DateTimeField(auto_now_add=True)
-    room_id = models.CharField(max_length=255, unique=True)
     username = models.CharField(max_length=255)
     request =  models.CharField(max_length=255)
     email = models.EmailField()
@@ -24,4 +23,8 @@ class ChatLog(models.Model):
 class FileLog(models.Model):
     id = models.AutoField(primary_key=True)   
     file = models.FileField(upload_to='chatfiles/%Y/%m/%d/')
+    owner = models.CharField(max_length=255)
+    room_id = models.CharField(max_length=255)
     created = models.DateTimeField(auto_now_add=True)
+    
+    

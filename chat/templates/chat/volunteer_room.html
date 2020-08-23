@@ -62,10 +62,7 @@
 		
 	document.querySelector('#chat-finish-submit').onclick = function(e) {
 		closing = true;
-		chatSocket.send(JSON.stringify({
-			'message': name+" has finished helping you. You may leave whenevs",
-			'name': name
-		}));
+
 		chatSocket.send(JSON.stringify({
 			'volunteer_finish': true
 		}));

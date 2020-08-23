@@ -2,7 +2,8 @@
 from django.shortcuts import render
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, FileResponse
+from django.core.exceptions import ObjectDoesNotExist
 
 from django.conf import settings
 from chat.models import UserQueue, ChatLog, FileLog
@@ -12,20 +13,83 @@ from .forms import InfoForm, FileForm
 from random import randint
 import requests
 from datetime import datetime, timedelta
+import os
 
 
 
 ############## GENERAL FUNCTIONS ###################
+def is_authorized(uuid,level):
+    r = requests.get("http://"+settings.MAIN_SITE_URL+":"+str(settings.MAIN_SITE_PORT)+"/api/users/verify", params={'uuid':uuid})
+    if(r.status_code!=200):
+        return False
+    
+    content = r.content.decode()
+    if(level=="volunteers" and (content=="volunteers" or content=="managers" or content=="admins")):
+        return True
+    if(level=="managers" and (content=="managers" or content=="admins")):
+        return True
+    if(level=="admins" and content=="admins"):
+        return True
+    
+    return False
+
+@xframe_options_exempt
+def download_file(request):
+    if(request.method == "GET"):
+        user_id=request.GET.get("uuid","")
+        room_id=request.GET.get("room_id","")
+        file_id=request.GET.get("id","")
+        
+        file_log = FileLog.objects.filter(id=file_id)
+        if(not file_log):
+            return HttpResponse('Unable to download', status=400) 
+        file_log = file_log.last()
+        
+        if(not is_authorized(user_id,"volunteers")):
+            if(file_log.room_id != room_id and file_log.owner!=user_id):
+                return HttpResponse('Unauthorized', status=401)
+            
+            
+        filename = file_log.file.path
+        response = FileResponse(open(filename, 'rb'))
+        return response
+
 @csrf_exempt 
 def handle_file(request):
-   
-    file_form = FileForm(request.POST, request.FILES)
-    
-    if(file_form.is_valid()):
-        model_file = file_form.save()
-        return HttpResponse(model_file.id, status=200)
+    if(request.method == "POST"):
+        #generate file form
+        file_form = FileForm(request.POST, request.FILES)
         
-    return HttpResponse('Failed to Upload', status=404)
+        #if file form is valid
+        if(file_form.is_valid()):
+            ######### REPLACE WITH FORM VALIDATION########
+        
+            #check file size
+            file = file_form.cleaned_data['file']
+            if(file.size >= 262144000):
+                return HttpResponse('File to large to upload', status=400)
+            
+            
+            #check file extension
+            fileName, fileExtension = os.path.splitext(file.name)
+            #if(fileExtension!=....):
+            #    return HttpResponse('File to large to upload', status=400)
+                
+                
+                
+            #upload file and set owner
+            model_file = file_form.save(commit=False)
+            model_file.owner = request.GET.get("uuid","")
+            model_file.room_id = request.GET.get("room_id","")
+            model_file.save()
+            
+            #return file id
+            return HttpResponse(model_file.id, status=200)
+        
+       
+        return HttpResponse('Failed to Upload', status=400)
+    else:
+        return HttpResponse('Failed to Upload', status=400)
     
     
 ############## USER FUNCTIONS ######################
@@ -36,13 +100,11 @@ def user_info(request):
     
     
     #### UNCOMMENT THIS TO ENABLE SECURITY
-    #verify user
-    #r = requests.get("http://"+settings.MAIN_SITE_URL+":"+str(settings.MAIN_SITE_PORT)+"/api/users/verify", params={'uuid':user_id})
- 
-    #if(r.status_code!=200):
+    #if(not is_authorized(user_id,"user"):
     #    return HttpResponse('Unauthorized', status=401)
     
     
+    #generate form with prefilled values if present
     info_form = InfoForm({'name':request.GET.get('name',""),'email':request.GET.get('email',"")})
     
     
@@ -54,62 +116,55 @@ def user_info(request):
 @csrf_exempt 
 def user_room(request):
     if(request.method  == "POST"): 
-        #get variables
+        #get userid variable
         user_id = request.GET.get('uuid'," ")
         
+        #create form
         info_form = InfoForm(request.POST)
         if(info_form.is_valid()):
-        
+            
+            #handle form data
             email = info_form.cleaned_data.get('email')
             name = info_form.cleaned_data.get('name')
             options = info_form.cleaned_data.get('request')
             options_string = ', '.join(options)
 
-            #verify user
-            #r = requests.get("http://"+settings.MAIN_SITE_URL+":"+str(settings.MAIN_SITE_PORT)+"/api/users/verify", params={'uuid':user_id})
-            
             #### UNCOMMENT THIS TO ENABLE SECURITY
-            #if(r.status_code!=200):
+            #if(not is_authorized(user_id,"user"):
             #    return HttpResponse('Unauthorized', status=401)
+                              
             
-            #Delete old chats. Need to find a better way to do this ###FIX###
-            time_threshold = datetime.now() - timedelta(hours=1)
-            results = UserQueue.objects.filter(created__lte=time_threshold).delete()
-                    
-
-            
-            
-            #see if user has already joined queue
+            #see if user has already joined queue via email
             log_user = ChatLog.objects.filter(email=email).last()
             if(log_user):
+                #get information from previous join.
                 queue_user = UserQueue.objects.filter(log_id=log_user.id)
-                queue_user[0].request = options_string;
-                queue_user[0].save()
-                               
-                request.session['chatid'] = queue_user[0].room_id
-                return render(request, 'chat/user_room.html', {
-                    'room_name': queue_user[0].room_id,
-                    'chat': str(log_user.text),
-                    'name': queue_user[0].username,
-                    'helped': queue_user[0].helping,
-                    'file_form':FileForm()
-                })
-                
-            
-            
+                if(queue_user):
+                    queue_user[0].request = options_string;
+                    queue_user[0].save()
+                                
+                    return render(request, 'chat/user_room.html', {
+                        'room_name': queue_user[0].room_id,
+                        'chat': str(log_user.text),
+                        'name': queue_user[0].username,
+                        'helped': queue_user[0].helping,
+                        'file_form':FileForm(),
+                        'uuid':user_id
+                    })
                 
             #Generate room id
             roomid = randint(1, 999)
+            
+            #make sure id is unique
             current_rooms = UserQueue.objects.filter(room_id=roomid)
             while(current_rooms):
                 roomid = randint(1, 999)
                 current_rooms = UserQueue.objects.filter(room_id=roomid)
                 
             
-            request.session['chatid'] = roomid
             
-            #add chat to general database
-            log = ChatLog(username=name,room_id=roomid,request=options_string,email=email)
+            #add chat to log database
+            log = ChatLog(username=name,request=options_string,email=email)
             log.save()
             
             #Add user to queue database
@@ -122,7 +177,8 @@ def user_room(request):
                 'room_name': roomid,
                 'chat': str(log.text),
                 'name': name,
-                'file_form':FileForm()
+                'file_form':FileForm(),
+                'uuid':user_id
             })
         else:
             return render(request, 'chat/forms/user_info.html', {'info_form': info_form,'uuid':user_id})
@@ -140,14 +196,11 @@ def volunteer_select(request):
         #verify user
         r = requests.get("http://"+settings.MAIN_SITE_URL+":"+str(settings.MAIN_SITE_PORT)+"/api/users/verify", params={'uuid':user_id})
        
-        if(r.status_code!=200):
-            return HttpResponse('Unauthorized', status=401)
-            
-        #if not volunteer or above
-        content = r.content.decode()
-        if(content != "volunteers" and content != "managers" and content != "admins"):
+        #verify user
+        if(not is_authorized(user_id,"volunteers")):
             return HttpResponse('Unauthorized', status=401)
         
+        #setup table information
         context = {
             "table_headers":["Name", "Request", "Being Helped", "Link"],
             "table_rows":[],
@@ -174,26 +227,27 @@ def volunteer_room(request):
         room_id = request.GET.get('room_id',-1)
         
         #verify user
-        r = requests.get("http://"+settings.MAIN_SITE_URL+":"+str(settings.MAIN_SITE_PORT)+"/api/users/verify", params={'uuid':user_id})
-       
-        if(r.status_code!=200):
-            return HttpResponse('Unauthorized', status=401)
-            
-        #if not volunteer or above
-        content = r.content.decode()
-        if(content != "volunteers" and content != "managers" and content != "admins"):
+        if(not is_authorized(user_id,"volunteers")):
             return HttpResponse('Unauthorized', status=401)
         
+        
+        
+        #if room was provided
         if(room_id==-1):
             return HttpResponse('Room Not Found', status=404)
         
+        #get room information
+        current_room = UserQueue.objects.filter(room_id=room_id)
+        if(not current_room):
+            return HttpResponse('Room Not Found', status=404)
         
+        current_room = current_room.last()    
         
-        #current_rooms = UserQueue.objects.filter(room_id=room_id).delete()
-        current_room = UserQueue.objects.get(room_id=room_id)
+        #update to helping
         current_room.helping = True
         current_room.save()
         
+        #get previous text
         log = ChatLog.objects.get(id=current_room.log_id)
         
         
@@ -202,7 +256,7 @@ def volunteer_room(request):
             'name': name,
             'uuid': user_id,
             'chat': str(log.text),
-            'file_form':FileForm()
+            'file_form':FileForm(),
         })        
         
         
