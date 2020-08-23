@@ -16,9 +16,15 @@ class InfoForm(forms.Form):
         self.fields['email'].required = True
         self.fields['request'].required = False
         
-        for f in self.fields.values():
-            f.widget.attrs = {"placeholder":f.label}
-            f.label = ""
+        
+        self.fields['name'].label = ""
+        self.fields['email'].label = ""
+        self.fields['request'].label = "" 
+        
+        self.fields['name'].widget.attrs = {"placeholder":"Name"}
+        self.fields['email'].widget.attrs = {"placeholder":"Email"}
+        
+
             
 
 class FileForm(forms.ModelForm):  
