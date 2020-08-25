@@ -18,20 +18,30 @@ import os
 
 
 ############## GENERAL FUNCTIONS ###################
-def is_authorized(uuid,level):
-    r = requests.get("http://"+settings.MAIN_SITE_URL+":"+str(settings.MAIN_SITE_PORT)+"/api/users/verify", params={'uuid':uuid})
-    if(r.status_code!=200):
-        return False
-    
-    content = r.content.decode()
-    if(level=="volunteers" and (content=="volunteers" or content=="managers" or content=="admins")):
+def verify_type(user_level, required_level):
+    if(required_level=="user" and (user_level=="user" or user_level=="volunteers" or user_level=="managers" or user_level=="admins")):
         return True
-    if(level=="managers" and (content=="managers" or content=="admins")):
+    if(required_level=="volunteers" and (user_level=="volunteers" or user_level=="managers" or user_level=="admins")):
         return True
-    if(level=="admins" and content=="admins"):
+    if(required_level=="managers" and (user_level=="managers" or user_level=="admins")):
+        return True
+    if(required_level=="admins" and user_level=="admins"):
         return True
     
     return False
+
+def get_type(uuid):
+    r = requests.get("http://"+settings.MAIN_SITE_URL+":"+str(settings.MAIN_SITE_PORT)+"/api/users/verify", params={'uuid':uuid})
+    if(r.status_code!=200):
+        return ""
+    
+    return r.content.decode()
+       
+
+def is_authorized(uuid,level):
+    content = get_type(uuid)
+    return verify_type(content,level)
+    
 
 @xframe_options_exempt
 def download_file(request):
@@ -183,20 +193,72 @@ def user_room(request):
         else:
             return render(request, 'chat/forms/user_info.html', {'info_form': info_form,'uuid':user_id})
             
- 
+
+@xframe_options_exempt
+def user_history(request):
+    print(1)
+    if(request.method  == "GET"): 
+        #get variables
+        email = request.GET.get('email'," ")    
+        user_id = request.GET.get('uuid'," ")
+        
+        #verify user
+        if(not is_authorized(user_id,"user")):
+            return HttpResponse('Unauthorized', status=401)
+        
+        #setup table information
+        context = {
+            "table_headers":["Created", "Request", "Link"],
+            "table_rows":[],
+            "uuid":user_id,
+            "email":email
+        }
+        
+        chat_history = ChatLog.objects.filter(email=email).order_by('-created')
+        for chat in chat_history:
+            context["table_rows"].append([chat.created, chat.request, chat.id ])
+        
+        return render(request, 'chat/table/chat_history.html', context)
+
+@xframe_options_exempt
+def user_history_chat(request):
+    if(request.method  == "GET"): 
+        #get variables
+        room_id = request.GET.get('id',"")    
+        email = request.GET.get('email',"")    
+        user_id = request.GET.get('uuid',"")
+        
+        #verify user
+        if(not is_authorized(user_id,"user")):
+            return HttpResponse('Unauthorized', status=401)
+        
+        
+        user = get_type(user_id)
+
+        try:
+            chat_log = ChatLog.objects.get(id=room_id)
+        except ObjectDoesNotExist:
+            return HttpResponse('Not Found', status=403)
+        
+        if(chat_log.email!=email and not verify_type(user,"managers")):
+            return HttpResponse('Unauthorized', status=401)
+        
+        
+            
+            
+        return render(request, 'chat/history_room.html', {
+            'uuid': user_id,
+            'chat': str(chat_log.text),
+        }) 
 
 ############## VOLUNTEER FUNCTIONS ###################
 @xframe_options_exempt
 def volunteer_select(request):
     if(request.method  == "GET"): 
         #get variables
-        name = request.GET.get('name'," ")    
+        name = request.GET.get('name',"No Name")    
         user_id = request.GET.get('uuid'," ")
         
-        #verify user
-        r = requests.get("http://"+settings.MAIN_SITE_URL+":"+str(settings.MAIN_SITE_PORT)+"/api/users/verify", params={'uuid':user_id})
-       
-        #verify user
         if(not is_authorized(user_id,"volunteers")):
             return HttpResponse('Unauthorized', status=401)
         
@@ -213,13 +275,13 @@ def volunteer_select(request):
         for user_row in users_in_que:
             context["table_rows"].append([user_row.username, user_row.request, user_row.helping, user_row.room_id ])
         
-        return render(request, 'chat/volunteer.html', context)
+        return render(request, 'chat/table/queue_select.html', context)
 
 @xframe_options_exempt
 def volunteer_room(request):
     if(request.method  == "GET"): 
         #get variables
-        name = request.GET.get('name','no name')
+        name = request.GET.get('name','No Name')
         if(name==" "):
             name = "no name"
             
@@ -258,5 +320,30 @@ def volunteer_room(request):
             'chat': str(log.text),
             'file_form':FileForm(),
         })        
+      
+
+############## Manager FUNCTIONS ###################
+@xframe_options_exempt
+def manager_history_chat(request):      
+    if(request.method  == "GET"): 
+        #get variables
+        user_id = request.GET.get('uuid'," ")
         
+        #verify user
+        if(not is_authorized(user_id,"user")):
+            return HttpResponse('Unauthorized', status=401)
+        
+        #setup table information
+        context = {
+            "table_headers":["Created", "Name", "Request", "Link"],
+            "table_rows":[],
+            "uuid":user_id,
+            "email":""
+        }
+        
+        chat_history = ChatLog.objects.all().order_by('-created')
+        for chat in chat_history:
+            context["table_rows"].append([chat.created, chat.username, chat.request, chat.id ])
+        
+        return render(request, 'chat/table/chat_history.html', context)
         

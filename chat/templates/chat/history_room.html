@@ -1,0 +1,15 @@
+{% extends "chat/generic_room.html" %}
+
+{% block main %}
+{{block.super}}
+{% block form %}
+{% endblock %}
+{% endblock main %}
+	
+	
+{% block scripts %}
+{{block.super}}
+<script>
+document.getElementById("input_conatiner").style.display = "none"; 
+</script>
+{% endblock scripts %}
