@@ -5,7 +5,7 @@ from chat.models import UserQueue
 from chat.models import ChatLog
 from channels.db import database_sync_to_async
 from django.core.exceptions import ObjectDoesNotExist
-
+from channels.exceptions import StopConsumer
 
 class ChatConsumer(AsyncWebsocketConsumer):
     name = ""
@@ -41,7 +41,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
-    
+        
+        raise StopConsumer 
     
     #### RECEIVE HELPER ####
     @database_sync_to_async
