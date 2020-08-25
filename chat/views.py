@@ -196,7 +196,6 @@ def user_room(request):
 
 @xframe_options_exempt
 def user_history(request):
-    print(1)
     if(request.method  == "GET"): 
         #get variables
         email = request.GET.get('email'," ")    
