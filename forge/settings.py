@@ -137,6 +137,18 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/uploads/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+REDIS_IP = '127.0.0.1'
+REDIS_PORT = 6379
+
+# CELERY Items
+BROKER_URL = 'redis://'+REDIS_IP+':'+str(REDIS_PORT)
+CELERY_RESULT_BACKEND = 'redis://'+REDIS_IP+':'+str(REDIS_PORT)
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+
+
 
 #ASGI Application
 ASGI_APPLICATION = 'forge.routing.application'
@@ -144,7 +156,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
+            "hosts": [(REDIS_IP, REDIS_PORT)],
         },
     },
 }

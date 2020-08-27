@@ -32,7 +32,7 @@
 			<tr>
 				{% for item in row %}
 					{%if forloop.last %}
-						<td><input type="submit" value="Join Chat" onclick="window.location='/user/history/chat?uuid={{uuid}}&id={{item}}&email={{row|last}}';" /></td>				
+						<td><input type="submit" value="View Chat" onclick="window.location='/user/history/chat?uuid={{uuid}}&id={{item}}&email={{row|last}}';" /></td>				
 					{% else %}
 						<td>{{item}}</td>
 					{% endif %}
