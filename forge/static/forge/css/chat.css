@@ -24,3 +24,21 @@
 	width: 100%;
 	height: 100%;
 }
+
+.message {
+	display: flex;
+    	flex-direction: column;
+    	align-items: start;
+}
+
+.msg_author {
+	color: #AF0909;
+}
+
+.msg_content {
+	padding: 5px;
+    	border-radius: 7px;
+    	border: 2px #AF0909 solid;
+    	background-color: white;
+    	margin: 0 0 auto;
+}
