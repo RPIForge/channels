@@ -224,7 +224,9 @@
 	document.getElementById("error").style.display = "none"; 
 	var chat_array = chat.split("\n");
 	for (var i = 0; i < chat_array.length; i++) {
-		addMessage(chat_array[i]); // this needs to be changed
+		var author = chat_array[i].split(":")[0];
+		var content = chat_array[i].split(":")[1];
+		addMessage(author, content);
 	}
 	</script>
 	{% endblock display_scripts %}
