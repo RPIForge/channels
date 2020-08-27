@@ -2,28 +2,8 @@
 
 
 {% block custom_styles %}
+{{block.super}}
 <style>
-.chat {
-	background-color: lightred;
-	width: 100%;
-	height: 90%;
-	top: 0;
-	left: 0;
-	overflow-y: scroll;
-}
-
-.inputbox {
-	width: 75%;
-	height: 5%;
-	float: left;
-}
-
-.inputsubmit {
-	margin-left:75%;
-	height: 5%;
-	width: 12.5%
-	border: 0;
-}
 
 .inputfinish {
 	margin-left:75%;
@@ -32,10 +12,7 @@
 	border: 0;
 }
 
-.input {
-	width: 100%;
-	height: 100%;
-}
+
 </style>
 {% endblock custom_styles %}
 

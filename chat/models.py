@@ -27,4 +27,7 @@ class FileLog(models.Model):
     room_id = models.CharField(max_length=255)
     created = models.DateTimeField(auto_now_add=True)
     
+    def delete(self, *args, **kwargs):
+        os.remove(os.path.join(settings.MEDIA_ROOT, self.file.name))
+        super(FileLog,self).delete(*args,**kwargs)
     
