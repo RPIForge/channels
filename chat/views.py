@@ -309,8 +309,10 @@ def volunteer_room(request):
         current_room.save()
         
         #get previous text
-        log = ChatLog.objects.get(id=current_room.log_id)
-        
+        try:
+            log = ChatLog.objects.get(id=current_room.log_id)
+        except ObjectDoesNotExist:
+            return HttpResponse('Room not found', status=400)
         
         return render(request, 'chat/volunteer_room.html', {
             'room_name': room_id,

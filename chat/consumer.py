@@ -9,6 +9,8 @@ from channels.exceptions import StopConsumer
 
 class ChatConsumer(AsyncWebsocketConsumer):
     name = ""
+    active = False
+    
     
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
@@ -29,12 +31,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.room_group_name,
                 {
                     'type': 'chat_message',
-                    'message': self.name+" has left the chat!\n",
-                    'name': self.name
+                    'message': self.name+" has left the chat!",
+                    'name': "system"
                 }
             )
    
-        await self.add_text(self.name+" has left the chat!\n")
+        await self.add_text("system,"+self.name+" has left the chat!")
    
         # Leave room group
         await self.channel_layer.group_discard(
@@ -57,7 +59,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except ObjectDoesNotExist:
             return None
         
-        log.text = log.text + string_data
+        log.text = log.text + string_data + "|||"
         return log.save()
     
     
@@ -71,7 +73,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 {
                     'type': 'chat_message',
                     'message': self.name+" has closed the chat. You may leave whenever",
-                    'name': self.name,
+                    'name': "system",
                     'volunteer_finish': True
                 }
             )
@@ -80,6 +82,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.delete_room()
             
         elif("volunteer_info" in text_data_json):
+            self.active=True
+            
             if(self.name==""):
                 self.name = text_data_json["volunteer_info"]
             
@@ -89,13 +93,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 {
                     'type': 'chat_message',
                     'message':message,
-                    'name': self.name,
-                    'volunteer_info': True
+                    'name': "system",
+                    'volunteer': True
                     
                 }
             )
             
-            await self.add_text(message+'\n') 
+            await self.add_text(str("system,"+message)) 
             
                    
         elif("message" in text_data_json):
@@ -105,7 +109,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             if(self.name==""):
                 self.name = name
             
-            await self.add_text(str(self.name+":"+message+'\n'))
+            await self.add_text(self.name+','+message)
             # Send message to room group
             await self.channel_layer.group_send(
                 self.room_group_name,

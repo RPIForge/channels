@@ -100,7 +100,7 @@
             const data = JSON.parse(e.data);
 			console.log(data);
 
-			if(data.hasOwnProperty('volunteer_info') && data.volunteer_info){
+			if(data.hasOwnProperty('volunteer') && data.volunteer){
 				var chatroom = document.getElementById("chatroom");
 				var waiting = document.getElementById("waiting");
 				
@@ -212,9 +212,19 @@
 	{% endblock scripts %}
 	{% block display_scripts %}
 	<script>
+	var last_author='';
 	const chat = "{{chat|escapejs }}";
 	function addMessage(author, content) {
-		var new_input = "<div class=message><div class=msg_author>" + author + "</div><div class=msg_content>" + content + "</div></div>";
+		if(last_author!=author){
+
+			var new_input = "<div class=message><div class=msg_author>" + author + "</div><div class=msg_content>" + content + "</div></div>";
+		} else {
+			var new_input = "<div class=message><div class=msg_content>" + content + "</div></div>";
+			
+			
+		}
+		last_author=author;
+		
 		var chat = document.getElementById("chatbox")
 		chat.innerHTML += new_input;
 
@@ -222,10 +232,10 @@
 	}
 		
 	document.getElementById("error").style.display = "none"; 
-	var chat_array = chat.split("\n");
-	for (var i = 0; i < chat_array.length; i++) {
-		var author = chat_array[i].split(":")[0];
-		var content = chat_array[i].split(":")[1];
+	var chat_array = chat.split("|||");
+	for (var i = 0; i < chat_array.length-1; i++) {
+		var author = chat_array[i].split(",")[0];
+		var content = chat_array[i].split(",")[1];
 		addMessage(author, content);
 	}
 	</script>
