@@ -111,7 +111,7 @@
 				if(waiting!==null){
 					waiting.style.display = "none"; 
 				}
-				addMessage(data.name+":"+data.message + '\n');
+				addMessage(data.name, data.message);
 			} else if(data.hasOwnProperty('volunteer_finish')) {
 				var input = document.getElementById("chat-message-input");
 				var submit = document.getElementById("chat-message-submit");
@@ -129,10 +129,10 @@
 					file.display = true; 
 				}
 				closing = true;
-				addMessage(data.name+":"+data.message + '\n');
+				addMessage(data.name, data.message);
 			
 			} else if(data.hasOwnProperty('message')) {
-				addMessage(data.name+":"+data.message + '\n');
+				addMessage(data.name, data.message);
 			}
         };
 
@@ -213,8 +213,8 @@
 	{% block display_scripts %}
 	<script>
 	const chat = "{{chat|escapejs }}";
-	function addMessage(input) {
-		var new_input = "<div class=message>"+input+"</div>";
+	function addMessage(author, content) {
+		var new_input = "<div class=message><div class=msg_author>" + author + "</div><div class=msg_content>" + content + "</div></div>";
 		var chat = document.getElementById("chatbox")
 		chat.innerHTML += new_input;
 
@@ -224,7 +224,7 @@
 	document.getElementById("error").style.display = "none"; 
 	var chat_array = chat.split("\n");
 	for (var i = 0; i < chat_array.length; i++) {
-		addMessage(chat_array[i]);
+		addMessage(chat_array[i]); // this needs to be changed
 	}
 	</script>
 	{% endblock display_scripts %}
