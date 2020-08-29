@@ -39,14 +39,15 @@
 				<input id="chat-message-input" type="text" class="input"><br>
 				
 				<input id="chat-message-submit" type="button" value="Send" class="input">
+				{% block volunteer_main %}
 				
-				<!-- finish button should be here -->
+				{% endblock volunteer_main %}
 			</div>
 			<br>
 			{% block form %}
 			<form method="POST" id="fileform">
 				{% csrf_token %}
-				{{file_form}}
+				{{file_form.file}}
 			</form>
 			{% endblock form %}
 		</div>	
