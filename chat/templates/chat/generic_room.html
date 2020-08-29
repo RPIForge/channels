@@ -39,14 +39,14 @@
 				<input id="chat-message-input" type="text" class="input"><br>
 				
 				<input id="chat-message-submit" type="button" value="Send" class="input">
-				
-				{% block form %}
-				<form method="POST" id="fileform">
-					{% csrf_token %}
-					{{file_form}}
-				</form>
-				{% endblock form %}
 			</div>
+			<br>
+			{% block form %}
+			<form method="POST" id="fileform">
+				{% csrf_token %}
+				{{file_form}}
+			</form>
+			{% endblock form %}
 		</div>	
 		</main>
 		{% endblock main %}
