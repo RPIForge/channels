@@ -36,13 +36,10 @@
 			</div>
 			
 			<div class="input_conatiner" id="input_conatiner">
-				<div class="inputbox">
 				<input id="chat-message-input" type="text" class="input"><br>
-				</div>
 				
-				<div class="inputsubmit">
 				<input id="chat-message-submit" type="button" value="Send" class="input">
-				</div>
+				
 				{% block form %}
 				<form method="POST" id="fileform">
 					{% csrf_token %}
