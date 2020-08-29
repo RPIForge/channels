@@ -1,4 +1,6 @@
 from django.db import models
+from django.conf import settings
+import os
 
 class UserQueue(models.Model):
     log_id = models.IntegerField()
@@ -28,6 +30,9 @@ class FileLog(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     
     def delete(self, *args, **kwargs):
-        os.remove(os.path.join(settings.MEDIA_ROOT, self.file.name))
+        path = os.path.join(settings.MEDIA_ROOT, self.file.name)
+        if(os.path.exists(path)):
+            os.remove(path)
+            
         super(FileLog,self).delete(*args,**kwargs)
     

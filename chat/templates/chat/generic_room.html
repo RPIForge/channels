@@ -35,21 +35,21 @@
 			<div id="chatbox" class="chat">
 			</div>
 			
-			<div class="input_conatiner" id="input_conatiner">
-				<div class="inputbox">
+			<div class="input_container" id="input_container">
 				<input id="chat-message-input" type="text" class="input"><br>
-				</div>
 				
-				<div class="inputsubmit">
 				<input id="chat-message-submit" type="button" value="Send" class="input">
-				</div>
-				{% block form %}
-				<form method="POST" id="fileform">
-					{% csrf_token %}
-					{{file_form}}
-				</form>
-				{% endblock form %}
+				{% block volunteer_main %}
+				
+				{% endblock volunteer_main %}
 			</div>
+			<br>
+			{% block form %}
+			<form method="POST" id="fileform">
+				{% csrf_token %}
+				{{file_form.file}}
+			</form>
+			{% endblock form %}
 		</div>	
 		</main>
 		{% endblock main %}
