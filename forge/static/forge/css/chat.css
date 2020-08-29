@@ -7,17 +7,31 @@
 	overflow-y: scroll;
 }
 
-.inputbox {
-	width: 75%;
-	height: 5%;
-	float: left;
+.input_container {
+	display: flex;
+	width: 100%;
+	justify-content: start;
+	height: 3%;
 }
 
-.inputsubmit {
-	margin-left:75%;
-	height: 5%;
-	width: 25%
-	border: 0;
+#chat-message-input {
+	width: 60%;
+	margin-right: 2%;
+	border: 3px solid #AF0909;
+	border-radius: 5px;
+}
+
+#chat-message-submit {
+	width: 8%;
+        margin-right: 20%;
+        border: 3px solid #AF0909;
+        border-radius: 5px;
+}
+
+#chat-finish-submit {
+	width: 8%;
+        border: 3px solid #AF0909;
+        border-radius: 5px;
 }
 
 .message {
