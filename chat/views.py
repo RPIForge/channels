@@ -107,7 +107,8 @@ def handle_file(request):
 def user_info(request):
     #get userid of request
     user_id = request.GET.get('uuid'," ")
-    
+    name = request.GET.get('name',"")
+    email = request.GET.get('email',"")
     
     #### UNCOMMENT THIS TO ENABLE SECURITY
     #if(not is_authorized(user_id,"user"):
@@ -115,7 +116,23 @@ def user_info(request):
     
     
     #generate form with prefilled values if present
-    info_form = InfoForm({'name':request.GET.get('name',""),'email':request.GET.get('email',"")})
+    log_user = ChatLog.objects.filter(email=email).last()
+    if(log_user):
+        #get information from previous join.
+        queue_user = UserQueue.objects.filter(log_id=log_user.id)
+        if(queue_user):
+            queue_user[0].save()
+                        
+            return render(request, 'chat/user_room.html', {
+                'room_name': queue_user[0].room_id,
+                'chat': str(log_user.text),
+                'name': queue_user[0].username,
+                'helped': queue_user[0].helping,
+                'file_form':FileForm(),
+                'uuid':user_id
+            })
+            
+    info_form = InfoForm({'name':name,'email':email})
     
     
 
