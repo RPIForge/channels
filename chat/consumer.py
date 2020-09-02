@@ -7,6 +7,11 @@ from channels.db import database_sync_to_async
 from django.core.exceptions import ObjectDoesNotExist
 from channels.exceptions import StopConsumer
 
+
+from .views import is_authorized
+from urllib.parse import parse_qs
+
+
 class ChatConsumer(AsyncWebsocketConsumer):
     name = ""
     active = False
@@ -124,3 +129,42 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def chat_message(self, event):
         # Send message to WebSocket
         await self.send(text_data=json.dumps(event))
+
+
+class SelectConsumer(AsyncWebsocketConsumer):
+    
+    async def connect(self):
+        paramaters = parse_qs(self.scope['query_string'].decode('utf8'))
+        uuid = paramaters['uuid']
+        
+        
+        if(not is_authorized(uuid,'volunteers')):
+            return
+        
+        self.room_group_name = 'select_refresh'
+
+        
+        
+        # Join room group
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
+        
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        # Leave room group
+        await self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name
+        )
+        
+        raise StopConsumer 
+    
+
+    # Receive message from room group
+    async def select_message(self, event):
+        # Send message to WebSocket
+        await self.send(text_data=json.dumps(event))
+    

@@ -5,6 +5,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, HttpResponseRedirect, FileResponse
 from django.core.exceptions import ObjectDoesNotExist
 
+#channel imports
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
+
+#forge specific import
 from django.conf import settings
 from chat.models import UserQueue, ChatLog, FileLog
 from .forms import InfoForm, FileForm
@@ -41,7 +47,7 @@ def get_type(uuid):
 def is_authorized(uuid,level):
     content = get_type(uuid)
     return verify_type(content,level)
-    
+
 
 @xframe_options_exempt
 def download_file(request):
@@ -121,8 +127,6 @@ def user_info(request):
         #get information from previous join.
         queue_user = UserQueue.objects.filter(log_id=log_user.id)
         if(queue_user):
-            queue_user[0].save()
-                        
             return render(request, 'chat/user_room.html', {
                 'room_name': queue_user[0].room_id,
                 'chat': str(log_user.text),
@@ -169,7 +173,7 @@ def user_room(request):
                 if(queue_user):
                     queue_user[0].request = options_string;
                     queue_user[0].save()
-                                
+                    
                     return render(request, 'chat/user_room.html', {
                         'room_name': queue_user[0].room_id,
                         'chat': str(log_user.text),
@@ -198,6 +202,17 @@ def user_room(request):
             queue = UserQueue(log_id=log.id, username=name,room_id=roomid,request=options_string)
             queue.save()
             
+            
+            channel_layer = get_channel_layer()
+            
+            async_to_sync(channel_layer.group_send)(
+                'select_refresh',{
+                    'type': 'select_message', 
+                    'name': name,
+                    'request': options_string,
+                    'room_name': roomid,
+                }
+            )
             
             
             return render(request, 'chat/user_room.html', {

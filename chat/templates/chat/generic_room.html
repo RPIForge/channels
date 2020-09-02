@@ -98,7 +98,6 @@
 		/*chat socket functions*/
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
-			console.log(data);
 
 			if(data.hasOwnProperty('volunteer') && data.volunteer){
 				var chatroom = document.getElementById("chatroom");
@@ -204,6 +203,7 @@
 		
 		/*general purpose function*/
 		function sendMessage(dictionary) {
+			dictionary['type']='chat_message';
 			chatSocket.send(JSON.stringify(dictionary));
 		
 		}
@@ -224,7 +224,7 @@
 		}
 		last_author=author;
 		
-		var chat = document.getElementById("chatbox")
+		var chat = document.getElementById("chatbox");
 		chat.innerHTML += new_input;
 
 		chat.scrollTop = chat.scrollHeight;
