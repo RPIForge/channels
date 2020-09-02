@@ -75,7 +75,7 @@
 		
 		/*variable decleration*/
 		closing = false;
-        const roomName = JSON.parse("{{room_name|escapejs }}");
+        const roomName = "{{room_name|escapejs }}";
 		const name = "{{name|escapejs }}";
 		const user_id = "{{uuid|escapejs }}";
         
@@ -223,8 +223,9 @@
 	var color_dictionary = {
 		'system': 'Black'
 	};
-	color_dictionary[name] ='#AF0909';
-
+	if(typeof name !== 'undefined'){
+		color_dictionary[name] ='#AF0909';
+	}
 	
 	
 	/*chat display functionality*/
@@ -233,14 +234,11 @@
 	function addMessage(author, content) {
 	
 		if(!(author in color_dictionary)){
-			console.log(author);
-			console.log(color_dictionary);
-			console.log(author == name);
 			color_dictionary[author] = color_array.shift();
 		}
 		var author_color=color_dictionary[author];
 		
-		if(last_author!=author){
+		if(last_author!=author || author==''){
 			var new_input = "<div class=message><div class=msg_author style='color:"+author_color+";'>" + author + "</div><div class=msg_content style='border-color:"+author_color+";'>" + content + "</div></div>";
 		} else {
 			var new_input = "<div class=message><div class=msg_content style='border-color:"+author_color+";'>" + content + "</div></div>";

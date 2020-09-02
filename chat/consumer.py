@@ -114,7 +114,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             if(self.name=="" and name!='system'):
                 self.name = name
             
-            await self.add_text(name+','+message)
+            await self.add_text(str(name+','+message))
             # Send message to room group
             await self.channel_layer.group_send(
                 self.room_group_name,
