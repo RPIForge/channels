@@ -211,14 +211,39 @@
 	{% endblock scripts %}
 	{% block display_scripts %}
 	<script>
-	var last_author='';
-	const chat = "{{chat|escapejs }}";
-	function addMessage(author, content) {
-		if(last_author!=author){
+	var color_array = [
+		'#0938af',
+		'#09af27',
+		'#af6d09',
+		'#0faf09',
+		'#5909af',
+		'#af09ac',
+		'#afa109',
+	]
+	var color_dictionary = {
+		'system': 'Black'
+	};
+	color_dictionary[name] ='#AF0909';
 
-			var new_input = "<div class=message><div class=msg_author>" + author + "</div><div class=msg_content>" + content + "</div></div>";
+	
+	
+	/*chat display functionality*/
+	var last_author='';
+	const chat_history = "{{chat|escapejs }}";
+	function addMessage(author, content) {
+	
+		if(!(author in color_dictionary)){
+			console.log(author);
+			console.log(color_dictionary);
+			console.log(author == name);
+			color_dictionary[author] = color_array.shift();
+		}
+		var author_color=color_dictionary[author];
+		
+		if(last_author!=author){
+			var new_input = "<div class=message><div class=msg_author style='color:"+author_color+";'>" + author + "</div><div class=msg_content style='border-color:"+author_color+";'>" + content + "</div></div>";
 		} else {
-			var new_input = "<div class=message><div class=msg_content>" + content + "</div></div>";
+			var new_input = "<div class=message><div class=msg_content style='border-color:"+author_color+";'>" + content + "</div></div>";
 			
 			
 		}
@@ -231,7 +256,7 @@
 	}
 		
 	document.getElementById("error").style.display = "none"; 
-	var chat_array = chat.split("|||");
+	var chat_array = chat_history.split("|||");
 	for (var i = 0; i < chat_array.length-1; i++) {
 		var author = chat_array[i].split(",")[0];
 		var content = chat_array[i].split(",")[1];

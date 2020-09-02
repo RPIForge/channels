@@ -50,9 +50,10 @@
 			const volunteer_name = "{{name|escapejs}}";
 			
 			
+			var table;
 			
 			$(document).ready( function () {
-					$('#data').DataTable({
+					table = $('#data').DataTable({
 						"aLengthMenu": [[20, 50, 100, -1], [20, 50, 100, "All"]],
 						"iDisplayLength": 20,
 						"dom": 'Bfrtip',
@@ -80,10 +81,13 @@
 			/*general purpose function*/
 			function addMessage(dictionary) {
 
-				var new_input = "<tr><td>"+dictionary['name']+"</td><td>"+dictionary['request']+"</td><td>no</td><td><input type='submit' value='Join Chat' onclick=\"window.location='/volunteer/chat?uuid="+uuid+"&room_id="+dictionary['room_name']+"&name="+volunteer_name+"';\" /></td>";				
-				
-				var chat = document.getElementById("table_body");
-				chat.innerHTML += new_input;
+				//var new_input = "<tr><td>"+dictionary['name']+"</td><td>"+dictionary['request']+"</td><td>no</td><td><input type='submit' value='Join Chat' onclick=\"window.location='/volunteer/chat?uuid="+uuid+"&room_id="+dictionary['room_name']+"&name="+volunteer_name+"';\" /></td>";				
+				table.row.add([
+					dictionary['name'],
+					dictionary['request'],
+					'no',
+					"<input type='submit' value='Join Chat' onclick=\"window.location='/volunteer/chat?uuid="+uuid+"&room_id="+dictionary['room_name']+"&name="+volunteer_name+"';\" />"
+				]).draw( false );
 				
 				beep();
 			}

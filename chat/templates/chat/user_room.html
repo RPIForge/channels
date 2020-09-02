@@ -25,7 +25,7 @@ document.getElementById("error").style.display = "none";
 chatSocket.onopen = function(e) {
 	chatSocket.send(JSON.stringify({
 		'message': name+" has joined the chat!",
-		'name': name
+		'name': 'system'
 	}));
 };
 </script>
