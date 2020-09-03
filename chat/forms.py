@@ -3,7 +3,18 @@ from . import models
 
 
 class InfoForm(forms.Form):
-    request_options =(("3dprinting","3d printing Help"),("lasercutter","Laser Cutter Help"), ("generalhelp","General Help"))
+    request_options =(
+    ('3d printing', 'Id like to come in and Print something'),
+    ('laser cutting', 'Id like to come in and Cut something'),
+    ('electronics', 'Id like to come in and Solder Something'),
+    ('sewing', 'Id like to come in and Sew Something'),
+    ('scanning', 'Id like to come in and Scan something'),
+    ('cad help', 'I have a CAD Model Question or Concern'),
+    ('file optimization', 'How can i optimize my model/cut plan?'),
+    ('general question', 'I have a general question about the forge'),
+    ('hours', 'What are your hours'),
+    ('covid', 'How are you responding to COVID'),
+    )
     
     name = forms.CharField(label='Your name')
     email = forms.EmailField()
