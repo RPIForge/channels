@@ -1,5 +1,31 @@
 {% extends "chat/generic_room.html" %}
 
+{% block custom_styles %}
+{{block.super}}
+<style>
+#chat-message-input {
+	width: 80%;
+	margin-right: 2%;
+	border: 3px solid #AF0909;
+	border-radius: 5px;
+}
+
+#chat-message-submit {
+	width: 10%;
+	margin-right: 2%;
+	border: 3px solid #AF0909;
+	border-radius: 5px;
+}
+
+#chat-message-file-select {
+	width: 10%;
+	margin-right: 0%;
+	border: 3px solid #AF0909;
+	border-radius: 5px;
+}
+</style>
+{% endblock custom_styles %}
+
 {% block main %}
 {{block.super}}
 <div id="waiting">

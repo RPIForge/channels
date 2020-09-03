@@ -138,8 +138,6 @@ def user_info(request):
             
     info_form = InfoForm({'name':name,'email':email})
     
-    
-
     return render(request, 'chat/forms/user_info.html', {'info_form': info_form,'uuid':user_id})
     
     
@@ -149,7 +147,7 @@ def user_room(request):
     if(request.method  == "POST"): 
         #get userid variable
         user_id = request.GET.get('uuid'," ")
-        
+    
         #create form
         info_form = InfoForm(request.POST)
         if(info_form.is_valid()):

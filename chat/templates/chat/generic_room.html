@@ -8,6 +8,7 @@
 		
 		{% block custom_styles %}
 			<link rel="stylesheet" type="text/css" href="{% static 'forge/css/chat.css' %}">
+			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 		{% endblock custom_styles %}
 
 
@@ -31,25 +32,29 @@
 
 		{% block main %}
 		<main>
-		<div id="chatroom">
+		<div id="chatroom" class="chatroom">
 			<div id="chatbox" class="chat">
 			</div>
 			
 			<div class="input_container" id="input_container">
-				<input id="chat-message-input" type="text" class="input"><br>
+				<input id="chat-message-input" type="text" class="input">
 				
 				<input id="chat-message-submit" type="button" value="Send" class="input">
-				{% block volunteer_main %}
 				
-				{% endblock volunteer_main %}
+			
+				{% block form %}
+				<form id="chat-message-file" method="POST" style="visibility:hidden; display: none;">
+					{% csrf_token %}
+					{{file_form.file}}
+				</form>
+				
+				<button  id="chat-message-file-select" style="font-size:24px" onclick="$('#id_file').click();" ><i class="fa fa-upload"></i></button>
+			
+				{% endblock form %}
 			</div>
-			<br>
-			{% block form %}
-			<form method="POST" id="fileform">
-				{% csrf_token %}
-				{{file_form.file}}
-			</form>
-			{% endblock form %}
+			
+			{% block volunteer_main %}
+			{% endblock volunteer_main %}
 		</div>	
 		</main>
 		{% endblock main %}
@@ -162,7 +167,7 @@
         };
 		
 		/*file upload code*/
-		document.getElementById("id_file").onchange = function() {
+		document.getElementById("chat-message-file").onchange = function() {
 			if(closing){
 				return;
 			}
@@ -197,7 +202,7 @@
 				}
 			});
 			
-			document.getElementById("id_file").value = '';
+			document.getElementById("chat-message-file").value = '';
 		};
 		
 		
