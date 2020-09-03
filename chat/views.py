@@ -119,8 +119,25 @@ def user_info(request):
     #### UNCOMMENT THIS TO ENABLE SECURITY
     #if(not is_authorized(user_id,"user"):
     #    return HttpResponse('Unauthorized', status=401)
-    
-    
+    session_room_id = request.session.get('room_id', -1)
+    if(session_room_id != -1):
+        try:
+            queue_user = UserQueue.objects.get(room_id=session_room_id)
+            print(queue_user)
+            log_user = ChatLog.objects.filter(id=queue_user.log_id).last()
+            
+            if(log_user and queue_user):
+                return render(request, 'chat/user_room.html', {
+                    'room_name': queue_user.room_id,
+                    'chat': str(log_user.text),
+                    'name': queue_user.username,
+                    'helped': queue_user.helping,
+                    'file_form':FileForm(),
+                    'uuid':user_id
+                })
+        except ObjectDoesNotExist:
+            pass
+            
     #generate form with prefilled values if present
     log_user = ChatLog.objects.filter(email=email).last()
     if(log_user):
@@ -144,6 +161,7 @@ def user_info(request):
 @xframe_options_exempt
 @csrf_exempt 
 def user_room(request):
+    
     if(request.method  == "POST"): 
         #get userid variable
         user_id = request.GET.get('uuid'," ")
@@ -161,7 +179,7 @@ def user_room(request):
             #### UNCOMMENT THIS TO ENABLE SECURITY
             #if(not is_authorized(user_id,"user"):
             #    return HttpResponse('Unauthorized', status=401)
-                              
+                             
             
             #see if user has already joined queue via email
             log_user = ChatLog.objects.filter(email=email).last()
@@ -212,6 +230,7 @@ def user_room(request):
                 }
             )
             
+            request.session['room_id'] = roomid
             
             return render(request, 'chat/user_room.html', {
                 'room_name': roomid,
