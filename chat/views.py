@@ -25,7 +25,7 @@ import os
 
 ############## GENERAL FUNCTIONS ###################
 def verify_type(user_level, required_level):
-    if(required_level=="user" and (user_level=="user" or user_level=="volunteers" or user_level=="managers" or user_level=="admins")):
+    if(required_level=="member" and (user_level=="member" or user_level=="volunteers" or user_level=="managers" or user_level=="admins")):
         return True
     if(required_level=="volunteers" and (user_level=="volunteers" or user_level=="managers" or user_level=="admins")):
         return True
@@ -117,7 +117,7 @@ def user_info(request):
     email = request.GET.get('email',"")
     
     #### UNCOMMENT THIS TO ENABLE SECURITY
-    #if(not is_authorized(user_id,"user"):
+    #if(not is_authorized(user_id,"member"):
     #    return HttpResponse('Unauthorized', status=401)
     session_room_id = request.session.get('room_id', -1)
     if(session_room_id != -1):
@@ -176,7 +176,7 @@ def user_room(request):
             options_string = ', '.join(options)
 
             #### UNCOMMENT THIS TO ENABLE SECURITY
-            #if(not is_authorized(user_id,"user"):
+            #if(not is_authorized(user_id,"member"):
             #    return HttpResponse('Unauthorized', status=401)
                              
             
@@ -214,8 +214,11 @@ def user_room(request):
             log.save()
             
             #Add user to queue database
-            queue = UserQueue(log_id=log.id, username=name,room_id=roomid,request=options_string)
+            queue = UserQueue(log_id=log.id, username=name,room_id=roomid,request=options_string,log=log)
             queue.save()
+            
+            log.queue = queue
+            log.save()
             
             
             channel_layer = get_channel_layer()
@@ -250,7 +253,7 @@ def user_history(request):
         user_id = request.GET.get('uuid'," ")
         
         #verify user
-        if(not is_authorized(user_id,"user")):
+        if(not is_authorized(user_id,"member")):
             return HttpResponse('Unauthorized', status=401)
         
         #setup table information
@@ -276,7 +279,7 @@ def user_history_chat(request):
         user_id = request.GET.get('uuid',"")
         
         #verify user
-        if(not is_authorized(user_id,"user")):
+        if(not is_authorized(user_id,"member")):
             return HttpResponse('Unauthorized', status=401)
         
         
@@ -379,7 +382,7 @@ def manager_history_chat(request):
         user_id = request.GET.get('uuid'," ")
         
         #verify user
-        if(not is_authorized(user_id,"user")):
+        if(not is_authorized(user_id,"member")):
             return HttpResponse('Unauthorized', status=401)
         
         #setup table information

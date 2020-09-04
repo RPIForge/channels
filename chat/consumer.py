@@ -77,7 +77,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.room_group_name,
                 {
                     'type': 'chat_message',
-                    'message': self.name+" has closed the chat. You may leave whenever",
+                    'message': self.name+" has closed the chat. You may leave at your convenience",
                     'name': "system",
                     'volunteer_finish': True
                 }
