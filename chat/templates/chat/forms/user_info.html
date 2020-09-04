@@ -17,10 +17,10 @@
         <div class="center_children fill_parent_horiz fill_screen_vert">
             <div id="form">
 				<div id="form-text-bold">
-					<strong>Please enter your information and select your help topic</strong>
+					<strong>Please enter your information</strong>
                 </div>
 				<div id="form-text-help">
-					if rejoining use same email and submit
+					If rejoining, use the same email
 				</div>
 				<form method="POST" action="/user/chat?uuid={{uuid}}">
                     {% csrf_token %}
@@ -33,7 +33,6 @@
                     
 					<div id="form-input">
 						{{ info_form.name }}
-						<br>
 						{{ info_form.email }}
 					</div>
 					
