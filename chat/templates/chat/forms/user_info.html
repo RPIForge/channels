@@ -13,11 +13,16 @@
 {% endblock header%}
 
 {% block main %}
-    <main class="bg_shade">
-        <div id="form_container" class="center_children fill_parent_horiz fill_screen_vert">
+    <main>
+        <div class="center_children fill_parent_horiz fill_screen_vert">
             <div id="form">
-                <p class="title" id="machine_selection_title"><strong>Please enter your information and select your help topic</strong><br>if rejoining use same email and submit</p>
-                <form method="POST" action="/user/chat?uuid={{uuid}}">
+				<div id="form-text-bold">
+					<strong>Please enter your information and select your help topic</strong>
+                </div>
+				<div id="form-text-help">
+					if rejoining use same email and submit
+				</div>
+				<form method="POST" action="/user/chat?uuid={{uuid}}">
                     {% csrf_token %}
 					{{ info_form.non_field_errors }}
 
@@ -26,22 +31,24 @@
 						{{ hidden_field }}
 					  {% endfor %}
                     
+					<div id="form-input">
+						{{ info_form.name }}
+						<br>
+						{{ info_form.email }}
+					</div>
 					
-					{{ info_form.name }}
-					<br>
-					{{ info_form.email }}
-					<br>
-					<p> Please select your help topic </p>
-					
-					{{ info_form.request }}
-                    <br /><br />
+					<div id="form-topic">
+						<p id="form-topic-text"> Please select your help topic </p>
+						
+						{{ info_form.request }}
 
-                    <label>By clicking Submit, you agree to our <a href="thing">Data Policy</a>.</label>
-
-                    <br />
-					
-                    <button type="submit" id="submit_button">Submit</button>
-                </form>
+						
+					</div>
+					<div id="form-submit">
+						<label>By clicking Submit, you agree to our <a href="thing">Data Policy</a>.</label>
+						<button type="submit" id="submit_button">Submit</button>
+					</div>
+				</form>
             </div>
         </div>
     </main>
