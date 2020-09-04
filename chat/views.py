@@ -123,8 +123,7 @@ def user_info(request):
     if(session_room_id != -1):
         try:
             queue_user = UserQueue.objects.get(room_id=session_room_id)
-            print(queue_user)
-            log_user = ChatLog.objects.filter(id=queue_user.log_id).last()
+            log_user = queue_user.log
             
             if(log_user and queue_user):
                 return render(request, 'chat/user_room.html', {
@@ -142,7 +141,7 @@ def user_info(request):
     log_user = ChatLog.objects.filter(email=email).last()
     if(log_user):
         #get information from previous join.
-        queue_user = UserQueue.objects.filter(log_id=log_user.id)
+        queue_user = log_user.queue
         if(queue_user):
             return render(request, 'chat/user_room.html', {
                 'room_name': queue_user[0].room_id,
@@ -185,7 +184,7 @@ def user_room(request):
             log_user = ChatLog.objects.filter(email=email).last()
             if(log_user):
                 #get information from previous join.
-                queue_user = UserQueue.objects.filter(log_id=log_user.id)
+                queue_user = log_user.queue
                 if(queue_user):
                     queue_user[0].request = options_string;
                     queue_user[0].save()
@@ -358,10 +357,10 @@ def volunteer_room(request):
         current_room.save()
         
         #get previous text
-        try:
-            log = ChatLog.objects.get(id=current_room.log_id)
-        except ObjectDoesNotExist:
-            return HttpResponse('Room not found', status=400)
+        log = current_room.log
+        
+        if(not log):
+            return HttpResponse('Room Not Found', status=404)
         
         return render(request, 'chat/volunteer_room.html', {
             'room_name': room_id,
