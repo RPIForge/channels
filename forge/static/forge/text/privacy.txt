@@ -1,0 +1,38 @@
+Privacy Policy
+
+Last modified: September 1, 2020
+
+
+This Privacy Policy describes how we collect the information when you use our chat application. The Policy also explains how we use and disclose the information collected from you.
+
+By using our chat application you agree to this privacy policy and give an explicit and informed consent to the processing. If you do not agree, please do not continue.
+
+1. Non-personal Data
+
+Non-personal data is information that does not identify you personally. We may collect non-personal data such as your device model, operating system version, country code, and other attributes to manage your communication with you.
+
+4. Personal Data
+
+We collect your email and name which will only be used for cyber security reasons. We will not share this information with any 3rd party.
+
+
+6.Your rights and options
+
+You also have the right to correct your data, have your data deleted, object how we use or share your data. You can always withdraw your consent by emailing us at webmaster@rpiforge.dev.
+
+We will respond to all requests within a reasonable timeframe.
+
+
+7.Information security
+
+We are very concerned about protecting the confidentiality of your information. We use administrative, physical and electronic measures designed to protect your personal and non-personal information from unauthorized access and use.
+
+
+8.Children
+
+We understand the importance of taking extra precautions when using our products and services to protect children's privacy and safety. We do not collect, use or disclose personal information about children. If you are under the age of 18, you can use our website with your parent or guardian.
+
+
+9.How to Contact Us.
+
+If you have any questions about this Privacy Policy, please feel free to contact us. Our email is webmaster@rpiforge.dev
