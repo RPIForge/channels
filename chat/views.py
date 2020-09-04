@@ -144,10 +144,10 @@ def user_info(request):
         queue_user = log_user.queue
         if(queue_user):
             return render(request, 'chat/user_room.html', {
-                'room_name': queue_user[0].room_id,
+                'room_name': queue_user.room_id,
                 'chat': str(log_user.text),
-                'name': queue_user[0].username,
-                'helped': queue_user[0].helping,
+                'name': queue_user.username,
+                'helped': queue_user.helping,
                 'file_form':FileForm(),
                 'uuid':user_id
             })
@@ -186,14 +186,14 @@ def user_room(request):
                 #get information from previous join.
                 queue_user = log_user.queue
                 if(queue_user):
-                    queue_user[0].request = options_string;
-                    queue_user[0].save()
+                    queue_user.request = options_string;
+                    queue_user.save()
                     
                     return render(request, 'chat/user_room.html', {
-                        'room_name': queue_user[0].room_id,
+                        'room_name': queue_user.room_id,
                         'chat': str(log_user.text),
-                        'name': queue_user[0].username,
-                        'helped': queue_user[0].helping,
+                        'name': queue_user.username,
+                        'helped': queue_user.helping,
                         'file_form':FileForm(),
                         'uuid':user_id
                     })
