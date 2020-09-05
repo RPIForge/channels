@@ -62,7 +62,7 @@ def download_file(request):
         file_log = file_log.last()
         
         if(not is_authorized(user_id,"volunteers")):
-            if(file_log.room_id != room_id and file_log.owner!=user_id):
+            if(file_log.room_id != room_id or file_log.owner!=user_id):
                 return HttpResponse('Unauthorized', status=401)
             
             
