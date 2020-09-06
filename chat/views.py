@@ -4,7 +4,7 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, HttpResponseRedirect, FileResponse
 from django.core.exceptions import ObjectDoesNotExist
-
+from django.utils.crypto import get_random_string 
 #channel imports
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
@@ -56,7 +56,7 @@ def download_file(request):
         room_id=request.GET.get("room_id","")
         file_id=request.GET.get("id","")
         
-        file_log = FileLog.objects.filter(id=file_id)
+        file_log = FileLog.objects.filter(file_id=file_id)
         if(not file_log):
             return HttpResponse('Unable to download', status=400) 
         file_log = file_log.last()
@@ -97,10 +97,12 @@ def handle_file(request):
             model_file = file_form.save(commit=False)
             model_file.owner = request.GET.get("uuid","")
             model_file.room_id = request.GET.get("room_id","")
+            model_file.file_id = get_random_string()
+            model_file.owner
             model_file.save()
             
             #return file id
-            return HttpResponse(model_file.id, status=200)
+            return HttpResponse(model_file.file_id, status=200)
         
        
         return HttpResponse('Failed to Upload', status=400)

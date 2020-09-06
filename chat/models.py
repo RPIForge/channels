@@ -24,7 +24,8 @@ class ChatLog(models.Model):
     
     
 class FileLog(models.Model):
-    id = models.AutoField(primary_key=True)   
+    id = models.AutoField(primary_key=True)  
+    file_id = models.CharField(max_length=255, unique=True)
     file = models.FileField(upload_to='chatfiles/%Y/%m/%d/')
     owner = models.CharField(max_length=255)
     room_id = models.CharField(max_length=255)
