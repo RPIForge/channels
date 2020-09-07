@@ -68,8 +68,7 @@
 			
 			/*chat socket decleration*/
 			const chatSocket = new WebSocket(
-				'ws://'
-				+ window.location.host
+				"{{SOCKET_URL|escapejs}}"
 				+ '/ws/select/?uuid='
 				+ uuid
 			);

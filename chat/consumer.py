@@ -49,8 +49,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
         
-        raise StopConsumer 
-    
+        
     #### RECEIVE HELPER ####
     @database_sync_to_async
     def delete_room(self):

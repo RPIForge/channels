@@ -75,6 +75,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'forge.context_processors.websocket_url',
             ],
         },
     },
@@ -165,6 +166,13 @@ CHANNEL_LAYERS = {
     },
 }
 
+CHAT_SITE_URL="172.18.54.169"
+
+#non ssl port
+CHAT_SITE_WS_PORT="8000"
+
+#ssl port
+CHAT_SITE_WSS_PORT="8001"
 
 MAIN_SITE_URL="172.18.49.25"
 MAIN_SITE_PORT=8000
