@@ -94,7 +94,7 @@ DATABASES = {
         'USER': 'postgres',
         'PASSWORD': 'password',
         'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'PORT': '1234',
     }
 }
 
@@ -166,15 +166,15 @@ CHANNEL_LAYERS = {
     },
 }
 
-CHAT_SITE_URL="172.18.54.169"
+CHAT_SITE_URL="forgedevchannels.eastus.cloudapp.azure.com"
 
 #non ssl port
 CHAT_SITE_WS_PORT="8000"
 
 #ssl port
-CHAT_SITE_WSS_PORT="8001"
+#CHAT_SITE_WSS_PORT="8002"
 
-MAIN_SITE_URL="172.18.49.25"
+MAIN_SITE_URL="forgedevchannels.eastus.cloudapp.azure.com"
 MAIN_SITE_PORT=8000
 
 #cORS SET update
