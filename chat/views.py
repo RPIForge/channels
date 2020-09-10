@@ -24,6 +24,7 @@ import os
 
 
 ############## GENERAL FUNCTIONS ###################
+###AUTH FUNCTIONS
 def verify_type(user_level, required_level):
     if(required_level=="member" and (user_level=="member" or user_level=="volunteers" or user_level=="managers" or user_level=="admins")):
         return True
@@ -48,7 +49,7 @@ def is_authorized(uuid,level):
     content = get_type(uuid)
     return verify_type(content,level)
 
-
+###FILE FUNCTIONS
 @xframe_options_exempt
 def download_file(request):
     if(request.method == "GET"):
@@ -109,6 +110,14 @@ def handle_file(request):
     else:
         return HttpResponse('Failed to Upload', status=400)
     
+    
+### CALENDAR FUNCTIONS
+def current_volunters():
+    r = requests.get("http://"+settings.MAIN_SITE_URL+":"+str(settings.MAIN_SITE_PORT)+"/api/volunteers/current")
+    if(r.status_code!=200):
+        return []
+    
+    return eval(r.content.decode())
     
 ############## USER FUNCTIONS ######################
 @xframe_options_exempt
@@ -180,7 +189,13 @@ def user_room(request):
             #### UNCOMMENT THIS TO ENABLE SECURITY
             #if(not is_authorized(user_id,"member"):
             #    return HttpResponse('Unauthorized', status=401)
-                             
+            
+            volunteer_list = current_volunters()
+            print(volunteer_list)
+            
+            volunteer_on_duty = False
+            if( len(volunteer_list)!=0):
+                volunteer_on_duty=True
             
             #see if user has already joined queue via email
             log_user = ChatLog.objects.filter(email=email).last()
@@ -197,7 +212,8 @@ def user_room(request):
                         'name': queue_user.username,
                         'helped': queue_user.helping,
                         'file_form':FileForm(),
-                        'uuid':user_id
+                        'uuid':user_id,
+                        'volunteer': volunteer_on_duty
                     })
                 
             #Generate room id
@@ -241,7 +257,8 @@ def user_room(request):
                 'chat': str(log.text),
                 'name': name,
                 'file_form':FileForm(),
-                'uuid':user_id
+                'uuid':user_id,
+                'volunteer': volunteer_on_duty
             })
         else:
             return render(request, 'chat/forms/user_info.html', {'info_form': info_form,'uuid':user_id})
