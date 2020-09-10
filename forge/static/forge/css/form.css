@@ -73,7 +73,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 #form-topic {
-	min-height: 35vh;
+	min-height: 15vh;
 	width: 100%;
 }
 

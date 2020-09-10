@@ -4,16 +4,20 @@ from . import models
 
 class InfoForm(forms.Form):
     request_options =(
-    ("3d printing", "Id like to come in and Print something"),
-    ("laser cutting", "Id like to come in and Cut something"),
-    ("electronics", "Id like to come in and Solder something"),
-    ("sewing", "Id like to come in and Sew something"),
-    ("scanning", "Id like to come in and Scan something"),
-    ("file optimization", "Id like to optimize my model/cut plan"),
-    ("cad help", "I have a CAD model question or concern"),
-    ("charges", "I have a question about pricing"),
-    ("covid", "I have a question about your COVID response"),
+    ("making", "Id like to come in and make something"),
+    ("resources", "Id like to come in and use something"),
     ("general question", "I have a general question about the forge"),
+    
+    #("3d printing", "Id like to come in and Print something"),
+    #("laser cutting", "Id like to come in and Cut something"),
+    #("electronics", "Id like to come in and Solder something"),
+    #("sewing", "Id like to come in and Sew something"),
+    #("scanning", "Id like to come in and Scan something"),
+    #("file optimization", "Id like to optimize my model/cut plan"),
+    #("cad help", "I have a CAD model question or concern"),
+    #("charges", "I have a question about pricing"),
+    #("covid", "I have a question about your COVID response"),
+    #("general question", "I have a general question about the forge"),
 
     )
     
