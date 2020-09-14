@@ -252,7 +252,7 @@ def user_room(request):
                     'request': options_string,
                     'room_name': roomid,
                     'email': email,
-                    'created': queue.created
+                    'created': str(queue.created)
                 }
             )
             
