@@ -32,13 +32,15 @@
 			<tr>
 					<td>{{ row.0 }}</td>
 					<td>{{ row.1 }}</td>
-					<td>{% if row.2 %}
+					<td>{{ row.2 }}</td>
+					<td>{{ row.3 }}</td>
+					<td>{% if row.4 %}
 						yes
 						{% else %}
 						no
 						{% endif%}
 					</td>
-					<td><input type="submit" value="Join Chat" onclick="window.location='/volunteer/chat?uuid={{uuid}}&room_id={{row.3}}&name={{name}}';" /></td>				
+					<td><input type="submit" value="Join Chat" onclick="window.location='/volunteer/chat?uuid={{uuid}}&room_id={{row.5}}&name={{name}}';" /></td>				
 
 			</tr>
 			{% endfor %}
@@ -85,7 +87,9 @@
 
 				//var new_input = "<tr><td>"+dictionary['name']+"</td><td>"+dictionary['request']+"</td><td>no</td><td><input type='submit' value='Join Chat' onclick=\"window.location='/volunteer/chat?uuid="+uuid+"&room_id="+dictionary['room_name']+"&name="+volunteer_name+"';\" /></td>";				
 				table.row.add([
+					dictionary['created'],
 					dictionary['name'],
+					dictionary['email'],
 					dictionary['request'],
 					'no',
 					"<input type='submit' value='Join Chat' onclick=\"window.location='/volunteer/chat?uuid="+uuid+"&room_id="+dictionary['room_name']+"&name="+volunteer_name+"';\" />"

@@ -231,6 +231,8 @@ def user_room(request):
                     'name': name,
                     'request': options_string,
                     'room_name': roomid,
+                    'email': email,
+                    'created': queue.created
                 }
             )
             
@@ -316,7 +318,7 @@ def volunteer_select(request):
         
         #setup table information
         context = {
-            "table_headers":["Name", "Request", "Being Helped", "Link"],
+            "table_headers":["Created", "Name", "Email", "Request", "Being Helped", "Link"],
             "table_rows":[],
             "page_title":"Users",
             "uuid":user_id,
@@ -325,7 +327,8 @@ def volunteer_select(request):
         
         users_in_que = UserQueue.objects.all();
         for user_row in users_in_que:
-            context["table_rows"].append([user_row.username, user_row.request, user_row.helping, user_row.room_id ])
+            chat_log = user_row.log
+            context["table_rows"].append([user_row.created, user_row.username, chat_log.email, user_row.request, user_row.helping, user_row.room_id ])
         
         return render(request, 'chat/table/queue_select.html', context)
 
