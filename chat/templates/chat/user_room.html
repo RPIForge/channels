@@ -27,7 +27,7 @@
 {% block main %}
 {{block.super}}
 <div id="waiting">
-	<p>Please wait, all of our volunteers are currently busy</p>
+	<p>{% if volunteer %} Please wait, all of our volunteers are currently busy {% else %} We're sorry none of our volunteers are currently on duty. Please check our hours' page for our availability. {% endif %} </p>
 </div>
 {% endblock main %}
 	
