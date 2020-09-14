@@ -114,6 +114,7 @@ def handle_file(request):
 ### CALENDAR FUNCTIONS
 def current_volunters():
     r = requests.get("http://"+settings.MAIN_SITE_URL+":"+str(settings.MAIN_SITE_PORT)+"/api/volunteers/current")
+    
     if(r.status_code!=200):
         return []
     
@@ -194,9 +195,12 @@ def user_room(request):
             print(volunteer_list)
             
             volunteer_on_duty = False
-            if( len(volunteer_list)!=0):
-                volunteer_on_duty=True
-            
+            try:
+                if( len(volunteer_list)!=0):
+                    volunteer_on_duty=True
+            except:
+                volunteer_on_duty=False
+                
             #see if user has already joined queue via email
             log_user = ChatLog.objects.filter(email=email).last()
             if(log_user):
