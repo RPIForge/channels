@@ -4,8 +4,8 @@ from . import models
 
 class InfoForm(forms.Form):
     request_options =(
-    ("making", "Id like to come in and make something"),
-    ("resources", "Id like to come in and use something"),
+    ("making", "I'd like to come in and make something"),
+    ("resources", "I'd like to come in and use something"),
     ("general question", "I have a general question about the forge"),
     
     #("3d printing", "Id like to come in and Print something"),
@@ -40,8 +40,6 @@ class InfoForm(forms.Form):
         self.fields["name"].widget.attrs = {"placeholder":"Name"}
         self.fields["email"].widget.attrs = {"placeholder":"Email"}
         
-
-            
 
 class FileForm(forms.ModelForm):  
     def __init__(self, *args, **kwargs):

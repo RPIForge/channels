@@ -8,7 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from channels.exceptions import StopConsumer
 
 
-from .views import is_authorized
+from .views import is_authorized, clear_room
 from urllib.parse import parse_qs
 
 
@@ -53,7 +53,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     #### RECEIVE HELPER ####
     @database_sync_to_async
     def delete_room(self):
-        return UserQueue.objects.filter(room_id=self.room_name).delete()
+        clear_room(self.room_name)
     
     @database_sync_to_async
     def add_text(self,string_data):

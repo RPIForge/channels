@@ -9,6 +9,7 @@ urlpatterns = [
     
     #user urls
     path('user/chat', views.user_room, name='user_chat'),
+    path('user/chat/end', views.user_end, name='user_end'),
     path('user/info', views.user_info, name='user_info'),
     path('user/history/select', views.user_history, name='user_history'),
     path('user/history/chat', views.user_history_chat, name='user_history'),
@@ -20,6 +21,8 @@ urlpatterns = [
     
     
     ##manager urls
-    path('manager/history/select', views.manager_history_chat, name='manager_history')
+    path('manager/history/select', views.manager_history_chat, name='manager_history'),
+    path('manager/request/select', views.manager_select, name='manager_select'),
+    path('manager/request/handle', views.manager_handle, name='manager_handle')
 ]
 

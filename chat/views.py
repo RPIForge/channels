@@ -12,7 +12,7 @@ from asgiref.sync import async_to_sync
 
 #forge specific import
 from django.conf import settings
-from chat.models import UserQueue, ChatLog, FileLog
+from chat.models import UserQueue, ChatLog, FileLog, MissedLog
 from .forms import InfoForm, FileForm
 
 
@@ -20,7 +20,7 @@ from random import randint
 import requests
 from datetime import datetime, timedelta
 import os
-
+from pytz import timezone
 
 
 ############## GENERAL FUNCTIONS ###################
@@ -109,7 +109,21 @@ def handle_file(request):
         return HttpResponse('Failed to Upload', status=400)
     else:
         return HttpResponse('Failed to Upload', status=400)
+
+##### CLEAR ROOM FUNCTIONS
+def clear_room(room_id):
+    UserQueue.objects.filter(room_id=room_id).delete()
     
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        'select_refresh',{
+            'type': 'select_message', 
+            'function': "delete",
+            'room_name': room_id,
+        }
+    )
+            
+            
     
 ### CALENDAR FUNCTIONS
 def current_volunters():
@@ -247,7 +261,8 @@ def user_room(request):
             
             async_to_sync(channel_layer.group_send)(
                 'select_refresh',{
-                    'type': 'select_message', 
+                    'type': 'select_message',
+                    'function': 'add',
                     'name': name,
                     'request': options_string,
                     'room_name': roomid,
@@ -268,8 +283,28 @@ def user_room(request):
             })
         else:
             return render(request, 'chat/forms/user_info.html', {'info_form': info_form,'uuid':user_id})
-            
 
+@csrf_exempt 
+def user_end(request):
+    if(request.method == "POST"):
+        room_id = request.GET.get("room_id","")
+        request = request.POST.get("request","")
+        try:
+            queue_object = UserQueue.objects.get(room_id=room_id)
+        except ObjectDoesNotExist:
+            return HttpResponse('Failed to Submit', status=400)
+        
+        log_object = queue_object.log
+        
+        missed_object = MissedLog(username=queue_object.username,request=request,email=log_object.email)
+        missed_object.save()
+        
+        clear_room(room_id)
+        
+        return HttpResponseRedirect('/user/info')
+    
+
+    
 @xframe_options_exempt
 def user_history(request):
     if(request.method  == "GET"): 
@@ -349,7 +384,8 @@ def volunteer_select(request):
         users_in_que = UserQueue.objects.all();
         for user_row in users_in_que:
             chat_log = user_row.log
-            context["table_rows"].append([user_row.created, user_row.username, chat_log.email, user_row.request, user_row.helping, user_row.room_id ])
+            created_time = user_row.created.astimezone(timezone('US/Eastern'))
+            context["table_rows"].append([created_time, user_row.username, chat_log.email, user_row.request, user_row.helping, user_row.room_id ])
         
         return render(request, 'chat/table/queue_select.html', context)
 
@@ -408,7 +444,7 @@ def manager_history_chat(request):
         user_id = request.GET.get('uuid'," ")
         
         #verify user
-        if(not is_authorized(user_id,"member")):
+        if(not is_authorized(user_id,"managers")):
             return HttpResponse('Unauthorized', status=401)
         
         #setup table information
@@ -421,7 +457,54 @@ def manager_history_chat(request):
         
         chat_history = ChatLog.objects.all().order_by('-created')
         for chat in chat_history:
+            created_time = chat.created.astimezone(timezone('US/Eastern'))
             context["table_rows"].append([chat.created, chat.username, chat.request, chat.id ])
         
         return render(request, 'chat/table/chat_history.html', context)
+        
+@xframe_options_exempt
+def manager_select(request):      
+    if(request.method  == "GET"): 
+        #get variables
+        user_id = request.GET.get('uuid'," ")
+        
+        #verify user
+        if(not is_authorized(user_id,"managers")):
+            return HttpResponse('Unauthorized', status=401)
+        
+        #setup table information
+        context = {
+            "table_headers":["Created", "Name", "email", "Request", "Handle"],
+            "table_rows":[],
+            "uuid":user_id
+        }
+        
+        missed_logs = MissedLog.objects.filter(handled=False).order_by('-created')
+        for logs in missed_logs:
+            created_time = logs.created.astimezone(timezone('US/Eastern'))
+            context["table_rows"].append([created_time, logs.username, logs.email, logs.request, logs.id])
+        
+        return render(request, 'chat/table/request_history.html', context)
+
+@xframe_options_exempt
+def manager_handle(request):      
+    if(request.method  == "GET"): 
+        #get variables
+        user_id = request.GET.get('uuid'," ")
+        request_id = request.GET.get('id'," ")
+        #verify user
+        if(not is_authorized(user_id,"managers")):
+            return HttpResponse('Unauthorized', status=401)
+        try:
+            log = MissedLog.objects.get(id=request_id)
+        except ObjectDoesNotExist:
+            return HttpResponse('Object not found', status=401) 
+        
+        log.handled=True
+        log.save()
+        
+        return HttpResponse('Successfully Updated', status=200)
+        
+        
+        
         

@@ -21,6 +21,13 @@ class ChatLog(models.Model):
     text = models.TextField()
     
 
+class MissedLog(models.Model):
+    id = models.AutoField(primary_key=True)
+    created = models.DateTimeField(auto_now_add=True)
+    username = models.CharField(max_length=255)
+    email = models.EmailField()
+    handled = models.BooleanField(default=False)
+    request =  models.CharField(max_length=255)
     
     
 class FileLog(models.Model):
