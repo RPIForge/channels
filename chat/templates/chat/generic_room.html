@@ -79,7 +79,7 @@
 		
 		
 		/*variable decleration*/
-		closing = false;
+		var closing = false;
         const roomName = "{{room_name|escapejs }}";
 		const name = "{{name|escapejs }}";
 		const user_id = "{{uuid|escapejs }}";
@@ -114,7 +114,9 @@
 				if(waiting!==null){
 					waiting.style.display = "none"; 
 				}
+                
 				addMessage(data.name, data.message);
+
 			} else if(data.hasOwnProperty('volunteer_finish')) {
 				var input = document.getElementById("chat-message-input");
 				var submit = document.getElementById("chat-message-submit");
