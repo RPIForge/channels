@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+from decouple import config
+from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,12 +22,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'kgg6xl=khmjq69ticxv8c*x#9z+$1d_dw)rrn2)9qw8bm5d2g8'
+SECRET_KEY = config('SECRET_KEY',default=get_random_secret_key(), cast=str)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG',default=False, cast=bool)
+ALLOWED_HOSTS = config('ALLOWED_HOSTS',default='*', cast=lambda v: [s.strip() for s in v.split(',')])
 
-ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -56,8 +58,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
 ]
 
-#X_FRAME_OPTIONS = 'SAMEORIGIN'
-X_FRAME_OPTIONS = 'ALLOW-FROM 172.18.201.10'
+
 CSRF_COOKIE_SAMESITE = None
 SESSION_COOKIE_SAMESITE = None
 #SESSION_COOKIE_SECURE = True
@@ -86,15 +87,14 @@ WSGI_APPLICATION = 'forge.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'forge_devel_channels',
-        'USER': 'postgres',
-        'PASSWORD': 'password',
-        'HOST': 'forgedevchannels.eastus.cloudapp.azure.com',
-        'PORT': '1234',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': config('POSTGRES_DB',default="forge_devel_channels"),
+        'USER': config('POSTGRES_USER',default="postgres"),
+        'PASSWORD': config('POSTGRES_PASSWORD',default="password"),
+        'HOST': config('POSTGRES_HOST',default="db"),
+        'PORT': config('POSTGRES_PORT',default="5432"), 
     }
 }
 
@@ -142,8 +142,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/uploads/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-REDIS_IP = '127.0.0.1'
-REDIS_PORT = 6379
+REDIS_IP = config('REDIS_HOST',default="redis")
+REDIS_PORT = config('REDIS_PORT',default=6379, cast=int)
 
 # CELERY Items
 BROKER_URL = 'redis://'+REDIS_IP+':'+str(REDIS_PORT)
@@ -164,9 +164,9 @@ CHANNEL_LAYERS = {
             "hosts": [(REDIS_IP, REDIS_PORT)],
         },
     },
-}
+} 
 
-CHAT_SITE_URL="127.0.0.1"
+CHAT_SITE_URL = "127.0.0.1"
 
 #non ssl port
 CHAT_SITE_WS_PORT="8001"
@@ -174,11 +174,13 @@ CHAT_SITE_WS_PORT="8001"
 #ssl port
 #CHAT_SITE_WSS_PORT="8002"
 
-MAIN_SITE_URL="127.0.0.1"
-MAIN_SITE_PORT=8000
+MAIN_SITE_URL= config('MAIN_SITE_HOST',default='127.0.0.1')
+MAIN_SITE_PORT=config('REDIS_PORT',default=8000, cast=int)
 
 #cORS SET update
 CORS_ORIGIN_WHITELIST = [
     "http://"+MAIN_SITE_URL+":"+str(MAIN_SITE_PORT),
     "https://"+MAIN_SITE_URL+":"+str(MAIN_SITE_PORT), 
 ]
+
+X_FRAME_OPTIONS = 'ALLOW-FROM 172.18.201.10'

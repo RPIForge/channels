@@ -1,0 +1,49 @@
+version: "3.9"
+   
+services:
+  db:
+    container_name: forge-db
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=forge_devel
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - database-data:/var/lib/postgresql/data # persist data even if container shuts down
+    ports:
+      - "5432:5432"
+  
+  nginx:
+    container_name: channels-nginx
+    image: channels/nginx:latest
+    build: ./nginx
+    restart: unless-stopped
+    volumes:
+      - ./static:/static
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
+  web:
+    container_name: channels-web
+    build: .
+    image: channels/website:latest
+    volumes:
+      - .:/code
+      - ./static:/code/static
+    environment:
+      - SECRET_KEY=set_in_prod
+      - DEBUG=True
+      - ALLOWED_HOSTS=*
+      - POSTGRES_DB=forge_devel
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_HOST=db
+    depends_on:
+      - db
+
+volumes:
+    database-data:
+      driver: local
