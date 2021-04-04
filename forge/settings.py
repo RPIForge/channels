@@ -142,7 +142,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/uploads/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-REDIS_IP = config('REDIS_HOST',default="redis")
+REDIS_IP = config('REDIS_URL',default="redis")
 REDIS_PORT = config('REDIS_PORT',default=6379, cast=int)
 
 # CELERY Items
@@ -166,16 +166,16 @@ CHANNEL_LAYERS = {
     },
 } 
 
-CHAT_SITE_URL = "127.0.0.1"
 
-#non ssl port
-CHAT_SITE_WS_PORT="8001"
+CHAT_SITE_URL = config('CHAT_SITE_URL',default='localhost')
+CHAT_SITE_PORT = config('CHAT_SITE_PORT',default='9000')
+CHAT_SITE_HTTPS = config('CHAT_SITE_HTTPS',default=True, cast=bool)
 
 #ssl port
 #CHAT_SITE_WSS_PORT="8002"
 
-MAIN_SITE_URL= config('MAIN_SITE_HOST',default='127.0.0.1')
-MAIN_SITE_PORT=config('REDIS_PORT',default=8000, cast=int)
+MAIN_SITE_URL= config('MAIN_SITE_URL',default='localhost')
+MAIN_SITE_PORT=config('MAIN_SITE_PORT',default=8000, cast=int)
 
 #cORS SET update
 CORS_ORIGIN_WHITELIST = [
@@ -183,4 +183,4 @@ CORS_ORIGIN_WHITELIST = [
     "https://"+MAIN_SITE_URL+":"+str(MAIN_SITE_PORT), 
 ]
 
-X_FRAME_OPTIONS = 'ALLOW-FROM 172.18.201.10'
+X_FRAME_OPTIONS = 'ALLOW-FROM '+str(MAIN_SITE_URL)

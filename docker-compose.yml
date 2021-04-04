@@ -13,6 +13,17 @@ services:
     ports:
       - "5432:5432"
   
+  redis:
+    container_name: channels-redis
+    image: "redis:alpine"
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    depends_on:
+      - web
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
+        
   nginx:
     container_name: channels-nginx
     image: channels/nginx:latest
@@ -25,7 +36,7 @@ services:
     depends_on:
       - web
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
-
+  
   web:
     container_name: channels-web
     build: .
@@ -43,6 +54,7 @@ services:
       - POSTGRES_HOST=db
     depends_on:
       - db
+      - redis
 
 volumes:
     database-data:
