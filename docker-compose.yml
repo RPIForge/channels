@@ -54,6 +54,8 @@ services:
       - CHAT_SITE_URL=localhost
       - CHAT_SITE_PORT=9000
       - CHAT_SITE_HTTPS=False
+      - MAIN_SITE_URL=localhost
+      - MAIN_SITE_PORT=8000
     depends_on:
       - db
       - redis
