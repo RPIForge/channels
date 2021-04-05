@@ -2,7 +2,7 @@ version: "3.9"
    
 services:
   db:
-    container_name: forge-db
+    container_name: channels-db
     image: postgres:13
     environment:
       - POSTGRES_DB=forge_devel
@@ -11,7 +11,7 @@ services:
     volumes:
       - database-data:/var/lib/postgresql/data # persist data even if container shuts down
     ports:
-      - "5432:5432"
+      - "5433:5432"
   
   redis:
     container_name: channels-redis
@@ -19,10 +19,6 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
-    depends_on:
-      - web
-    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
-
         
   nginx:
     container_name: channels-nginx
@@ -32,7 +28,7 @@ services:
     volumes:
       - ./static:/static
     ports:
-      - "80:80"
+      - "9000:80"
     depends_on:
       - web
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
@@ -52,6 +48,12 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
       - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - REDIS_URL=redis
+      - REDIS_PORT=6379
+      - CHAT_SITE_URL=localhost
+      - CHAT_SITE_PORT=9000
+      - CHAT_SITE_HTTPS=False
     depends_on:
       - db
       - redis

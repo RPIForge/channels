@@ -11,4 +11,4 @@ COPY . /code/
 
 RUN python3 manage.py collectstatic --no-input
 EXPOSE 9000
-CMD ["daphne", "-b", "0.0.0.0", "-p", "9000", "forge.wsgi:application"]
+CMD ["daphne", "-b", "0.0.0.0", "-p", "9000", "forge.asgi:application"]
